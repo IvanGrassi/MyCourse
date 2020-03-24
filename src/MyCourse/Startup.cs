@@ -16,6 +16,7 @@ namespace MyCourse
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllersWithViews();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,11 +35,11 @@ namespace MyCourse
 
             app.UseEndpoints(endpoints => //secondo middleware
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    string nome = context.Request.Query["nome"];
-                    await context.Response.WriteAsync($"Hello {nome}!");
-                });
+                //app.UseMvcWithDefaultRoute();
+                //configurato una route con il template controller, action e id. ora il middleware é in grado di estrapolare info dal percorso della richiesta utente
+
+                endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");  //settati i valori di default, id é opzionale
+                //Courses/Detail/5 = Controller/Action/id
             });
         }
     }
