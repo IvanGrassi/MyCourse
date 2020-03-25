@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">    <!--View utilizzata per mettere tutto il codice di intestazione della pagina (header/footer)-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elenco dei corsi</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li>Pagina1</li>
+                <li>Pagina2</li>
+                <li>Pagina3</li>
+                <li>Pagina4</li>
+                <li>Pagina5</li>
+            </ul>
+        </nav>
+    </header>
+    @RenderBody()       <!--Il new engine razor capisce che deve inserire tutto ciò che si trovava all'interno di index-->
+        <footer>
+        <p>Conttattaci al numero...</p>
+    </footer>
+</body>
+</html>
