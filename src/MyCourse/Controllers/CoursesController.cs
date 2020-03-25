@@ -6,7 +6,11 @@ namespace MyCourse.Controllers
     {
         public IActionResult Index()        //Courses
         {
+<<<<<<< HEAD
             return View();      //va a cercare una view chiamata Index.cshtml in courses
+=======
+            return View();
+>>>>>>> 745fce1... Aggiunta view di contenuto e una view di layout
         }
 
         public IActionResult Detail(string id)  //Detail/5
