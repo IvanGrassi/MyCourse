@@ -6,10 +6,7 @@ namespace MyCourse.Controllers
     {
         public IActionResult Index()
         {
-<<<<<<< HEAD
             //return Content("Ciao ddddd");
-=======
->>>>>>> Sezione07
             return View();
         }
     }
