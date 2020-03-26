@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Westwind.AspNetCore.LiveReload;
 
 namespace MyCourse
 {
@@ -16,7 +17,10 @@ namespace MyCourse
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+#if DEBUG
+            services.AddLiveReload();
+#endif
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -26,6 +30,10 @@ namespace MyCourse
             {
                 app.UseDeveloperExceptionPage();    //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
             }
+
+#if DEBUG
+            app.UseLiveReload();
+#endif
 
             //l'ambiente (production o development) viene definito nel launchsettings.json
 
