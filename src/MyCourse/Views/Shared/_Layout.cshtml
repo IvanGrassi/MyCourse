@@ -25,7 +25,7 @@
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" asp-action="Index" asp-controller="Home">Home</a>
+                        <a class="nav-link" asp-action="Index" asp-controller="Home">Home</a>   <!--crea un link indicando nome dell'action e del controller-->
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" asp-action="Index" asp-controller="Courses">Catalogo Corsi</a>
@@ -34,7 +34,7 @@
             </div>
         </nav>
     </header>
-    <div class="container"> 
+    <div class="container">     <!--RenderBody indicail punto in cui sarà incastonato l'output HTML prodotto dalla view di contenuto-->
     @RenderBody()
     </div>
     
