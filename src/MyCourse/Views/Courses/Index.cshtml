@@ -1,28 +1,40 @@
-<h1>Catalogo dei corsi</h1>
+@model List<CourseViewModel>    //rende fortemente tipizzata la view
+<h1>@ViewData["Title"]</h1>
 
-@for(int i = 1; i <= 10; i++)
-{                   //for che mi permette di stampare un numero definito di corsi senza dover riutilizzare il codice
+@foreach(CourseViewModel course in Model) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
+{                                         //richiama gli elementi presenti in CourseViewModel che vengono richiamati in CourseService.cs   
 <hr>
 <div class="row course">
-    <div class="col-md-1">
-        <img src="~/logo.svg" width="52" height="52">
+    <div class="col-md-1"> 
+        <img src="@course.ImagePath" width="52" height="52">    
     </div>
     <div class="col-md-5">
-        <h2>Titolo del corso</h2>
-        <author>di Nome autore</author>
+        <h2>@course.Title</h2>
+        <author>@course.Author</author>
     </div>
-    <div class="col-md-2 rating">  
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
-        <i class="fas fa-star"></i>
+    <div class="col-md-2 rating" title="@course.Rating">  
+        @for(int i = 1; i <= 5; i++){
+            if(course.Rating >= i)          //es: 4.5 > 1, poi incremento: 4.5 > 2, ecc.., 4.5 < 5, stampa la stella intera
+            {
+                <i class="fas fa-star"></i>
+            }
+            else if (course.Rating > i -1) //es: 4.5 > 5-1(4), allora stampa la stella a metà
+            {
+                <i class="fas fa-star-half-alt"></i>
+            }
+            else{                           //in tutti gli altri casi: stella vuota
+                <i class="far fa-star"></i>
+            }
+        }
     </div>
     <div class="col-md-2 price">
-        EUR 10,99<br/><s>EUR 12,99</s>
+        @course.CurrentPrice
+        @if(!course.CurrentPrice.Equals(course.FullPrice)){  //se i prezzi non sono uguali, allora stampami anche il prezzo intero
+            <br/><s>@course.FullPrice</s>
+        }
     </div>
     <div class="col-md-2 d-flex align-items-center">
-        <a class="btn btn-outline-primary" asp-action="Detail" asp-route-id="5">Dettaglio corso 5</a>   
+        <a class="btn btn-outline-primary" asp-action="Detail" asp-route-id="@course.Id">Dettaglio</a>   
     </div>
 </div>
 }
