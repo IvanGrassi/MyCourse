@@ -4,9 +4,9 @@ using MyCourse.Models.Enums;
 using MyCourse.Models.ValueTypes;
 using MyCourse.Models.ViewModels;
 
-namespace MyCourse.Models.Services.Application
+namespace MyCourse.Models.Services.Application                  //IMPLEMENTAZIONE
 {
-    public class CourseService                      //invocato dai controller per girare loro dei dati
+    public class CourseService : ICourseServices                 //invocato dai controller per girare loro dei dati, implementata l'interfaccia
     {
         public List<CourseViewModel> GetCourses()
         {
@@ -23,7 +23,7 @@ namespace MyCourse.Models.Services.Application
                     FullPrice = new Money(Currency.EUR, random.NextDouble() > 0.5 ? price : price - 1),
                     Author = "Nome cognome",
                     Rating = random.NextDouble() * 5.0,         //numero casuale tra 0.0 e 1.0 moltiplicato per 5
-                    ImagePath = "logo.svg"
+                    ImagePath = "/logo.svg"
                 };
                 courseList.Add(course);                         //aggiunge ogni corso alla lista
             }
@@ -41,8 +41,8 @@ namespace MyCourse.Models.Services.Application
                 CurrentPrice = new Money(Currency.EUR, price),  //Currency = EUR, Amount = price
                 FullPrice = new Money(Currency.EUR, random.NextDouble() > 0.5 ? price : price - 1),
                 Author = "Nome cognome",
-                Rating = random.NextDouble() * 5.0,
-                ImagePath = "logo.svg",
+                Rating = random.Next(10, 50) / 10.0,
+                ImagePath = "/logo.svg",
                 Description = $"Descrizione {id}",
                 Lessons = new List<LessonViewModel>()       //lista che conterrà tutte le lezioni del corso con id ...
             };

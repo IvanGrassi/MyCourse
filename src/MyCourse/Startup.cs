@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyCourse.Models.Services.Application;
 using Westwind.AspNetCore.LiveReload;
 
 namespace MyCourse
@@ -15,20 +16,21 @@ namespace MyCourse
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)          //lega le interfacce ad implementazioni
         {
 #if DEBUG
             services.AddLiveReload();
 #endif
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
+            services.AddTransient<ICourseServices, CourseService>();        //ogni volta che ho una dipendenza da ICourseServices, in realtà la sostituisce e coustruisce un CourseService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())    //il middleware viene usato solo quando siamo in ambiente development
+            if (env.IsDevelopment())                                        //il middleware viene usato solo quando siamo in ambiente development
             {
-                app.UseDeveloperExceptionPage();    //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
+                app.UseDeveloperExceptionPage();                            //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
             }
 
 #if DEBUG
@@ -37,7 +39,7 @@ namespace MyCourse
 
             //l'ambiente (production o development) viene definito nel launchsettings.json
 
-            app.UseStaticFiles();               //middleware file statici (immagini ad esempio)
+            app.UseStaticFiles();                                           //middleware file statici (immagini ad esempio)
 
             app.UseRouting();
 
