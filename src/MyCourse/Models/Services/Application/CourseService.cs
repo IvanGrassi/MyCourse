@@ -4,6 +4,8 @@ using MyCourse.Models.Enums;
 using MyCourse.Models.ValueTypes;
 using MyCourse.Models.ViewModels;
 
+//file escluso dalla compilazione in Mycourse.csproj
+
 namespace MyCourse.Models.Services.Application                  //IMPLEMENTAZIONE
 {
     public class CourseService : ICourseServices                 //invocato dai controller per girare loro dei dati, implementata l'interfaccia

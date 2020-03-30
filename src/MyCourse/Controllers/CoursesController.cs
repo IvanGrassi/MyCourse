@@ -7,8 +7,8 @@ namespace MyCourse.Controllers
 {
     public class CoursesController : Controller
     {
-        private readonly ICourseServices courseService;
-        public CoursesController(ICourseServices courseService)   //dipendenza del CoursesController dal Course service (senza questo non potrebbe funzionare)
+        private readonly ICourseService courseService;
+        public CoursesController(ICourseService courseService)   //dipendenza del CoursesController dal Course service (senza questo non potrebbe funzionare)
         {
             this.courseService = courseService;
         }

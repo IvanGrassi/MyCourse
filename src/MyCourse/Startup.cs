@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyCourse.Models.Services.Application;
+using MyCourse.Models.Services.Infrastructure;
 using Westwind.AspNetCore.LiveReload;
 
 namespace MyCourse
@@ -22,7 +23,8 @@ namespace MyCourse
             services.AddLiveReload();
 #endif
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
-            services.AddTransient<ICourseServices, CourseService>();        //ogni volta che ho una dipendenza da ICourseServices, in realtà la sostituisce e coustruisce un CourseService
+            services.AddTransient<ICourseService, AdoNetCourseServices>();        //ogni volta che un componente ha una dipendenza da ICourseServices, in realtà la sostituisce e coustruisce un AdoNetCourseServices
+            services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>();       //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

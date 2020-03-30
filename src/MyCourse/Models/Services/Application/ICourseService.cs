@@ -3,7 +3,7 @@ using MyCourse.Models.ViewModels;
 
 namespace MyCourse.Models.Services.Application
 {
-    public interface ICourseServices
+    public interface ICourseService
     {
         //a differenza di una classe NON contiene logica, ma si limita a definire un elenco
         //di proprietà, metodi ed eventi.
