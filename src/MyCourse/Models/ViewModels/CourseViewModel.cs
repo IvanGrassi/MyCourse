@@ -15,9 +15,9 @@ namespace MyCourse.Models.ViewModels
         public Money FullPrice { get; set; }
         public Money CurrentPrice { get; set; }
 
-        public static CourseViewModel FromDataRow(DataRow courseRow) //fa il mapping di ogni datarow su istanze di CourseViewModel
+        public static CourseViewModel FromDataRow(DataRow courseRow) //fa il mapping di ogni datarow restituendo un oggetto di CourseViewModel o di CourseDetailViewModel
         {
-            //qui genero un istanza di CourseViewModel
+            //qui genero un istanza di CourseViewModel, assegno ogni proprietà con i dati ottenuti dal DataRow
             var courseViewModel = new CourseViewModel
             {
                 Title = Convert.ToString(courseRow["Title"]),
