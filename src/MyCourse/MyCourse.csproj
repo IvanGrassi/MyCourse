@@ -3,9 +3,10 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Models/Services/Application/CourseService.cs"/> <!--Non compilo più questo file statico per l'ottenimento dei dati-->
-    <PackageReference Include="Microsoft.Data.SQLite" Version="3.1.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.0" Condition="'$(Configuration)' == 'Debug'"/>
-    <PackageReference Include="Westwind.AspnetCore.LiveReload" Version="0.1.12" Condition="'$(Configuration)' == 'Debug'"/>
+    <Compile Remove="Models/Services/Application/CourseService.cs" /> <!--Non compilo più questo file statico per l'ottenimento dei dati-->
+    <PackageReference Include="Microsoft.Data.SQLite" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.0" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
+    <PackageReference Include="Westwind.AspnetCore.LiveReload" Version="0.1.12" Condition="'$(Configuration)' == 'Debug'" />
   </ItemGroup>
 </Project>

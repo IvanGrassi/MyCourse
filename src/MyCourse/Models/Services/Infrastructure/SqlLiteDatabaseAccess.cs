@@ -9,7 +9,7 @@ namespace MyCourse.Models.Services.Infrastructure
     public class SqlLiteDatabaseAccess : IDatabaseAccess
     {
         //implementazione completa del servizio infrastrutturale (IDatabaseAccess)
-        public async Task<DataSet> ExecuteQuery(FormattableString formattableQuery)       //oggetto in grado di conservare in memoria una o piu tabelle di risultati che arrivano da un db relazionale
+        public async Task<DataSet> ExecuteQueryAsync(FormattableString formattableQuery)       //oggetto in grado di conservare in memoria una o piu tabelle di risultati che arrivano da un db relazionale
         {
             var queryArguments = formattableQuery.GetArguments();             //otteniamo gli argomenti della query (l'id che viene usato sia per la tabella dei Courses che delle Lessons)
             var sqlLiteParameters = new List<SqliteParameter>();              //creiamo una lista di parametri (Sqliteparameters)
@@ -45,11 +45,6 @@ namespace MyCourse.Models.Services.Infrastructure
                     }
                 }
             }
-        }
-
-        public Task<DataSet> ExecuteQueryAsync(FormattableString query)
-        {
-            throw new NotImplementedException();
         }
     }
 }
