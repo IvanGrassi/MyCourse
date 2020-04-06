@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MyCourse.Models.Enums;
 using MyCourse.Models.ValueTypes;
 using MyCourse.Models.ViewModels;
@@ -9,7 +10,7 @@ using MyCourse.Models.ViewModels;
 
 namespace MyCourse.Models.Services.Application                  //FILE ESCLUSO DALLA COMPILAZIONE, NON VIENE PIU USATO
 {
-    public class CourseService : ICourseServices                 //invocato dai controller per girare loro dei dati, implementata l'interfaccia
+    public class CourseService : ICourseService                 //invocato dai controller per girare loro dei dati, implementata l'interfaccia
     {
         public List<CourseViewModel> GetCourses()
         {
@@ -60,6 +61,16 @@ namespace MyCourse.Models.Services.Application                  //FILE ESCLUSO D
                 course.Lessons.Add(lesson);
             }
             return course;
+        }
+
+        public Task<List<CourseViewModel>> GetCoursesAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<CourseDetailViewModel> GetCourseAsync(int id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
