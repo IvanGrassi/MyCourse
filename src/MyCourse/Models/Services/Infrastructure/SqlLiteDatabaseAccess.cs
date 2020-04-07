@@ -3,11 +3,22 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using MyCourse.Models.Options;
 
 namespace MyCourse.Models.Services.Infrastructure
 {
     public class SqlLiteDatabaseAccess : IDatabaseAccess
     {
+        private readonly IOptionsMonitor<ConnectionStringsOptions> ConnectionStringsOptions;
+
+
+        public SqlLiteDatabaseAccess(IOptionsMonitor<ConnectionStringsOptions> ConnectionStringsOptions) //Ricevo il servizio dal costruttore
+        {
+            this.ConnectionStringsOptions = ConnectionStringsOptions;       //Conservo il riferimento al servizio su un campo privato...
+        }
+
         //implementazione completa del servizio infrastrutturale (IDatabaseAccess)
         public async Task<DataSet> ExecuteQueryAsync(FormattableString formattableQuery)       //oggetto in grado di conservare in memoria una o piu tabelle di risultati che arrivano da un db relazionale
         {
@@ -22,8 +33,9 @@ namespace MyCourse.Models.Services.Infrastructure
             string query = formattableQuery.ToString();
 
 
-
-            using (var conn = new SqliteConnection("Data source=Data/MyCourse.db"))
+            //Colleghiamoci al db Sqlite, inviamo la query e leggiamo i risultati
+            string connectionString = ConnectionStringsOptions.CurrentValue.Default;    //NON dobbiamo più scrivere la stringa, ma usiamo Default
+            using (var conn = new SqliteConnection(connectionString))
             {
                 await conn.OpenAsync();
                 using (var cmd = new SqliteCommand(query, conn))

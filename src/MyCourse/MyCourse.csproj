@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>MyCourse</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Models/Services/Application/CourseService.cs" /> <!--Non compilo più questo file statico per l'ottenimento dei dati-->

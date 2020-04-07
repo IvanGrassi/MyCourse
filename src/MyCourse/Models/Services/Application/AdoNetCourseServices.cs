@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
 using MyCourse.Models.ViewModels;
 
@@ -11,9 +13,11 @@ namespace MyCourse.Models.Services.Application
     {
 
         private readonly IDatabaseAccess db;
+        private readonly IOptionsMonitor<CoursesOptions> CoursesOptions;
 
-        public AdoNetCourseServices(IDatabaseAccess db) //esprime la dipendenza
+        public AdoNetCourseServices(IDatabaseAccess db, IOptionsMonitor<CoursesOptions> CoursesOptions) //dipende dai due servizi infrastrutturali
         {
+            this.CoursesOptions = CoursesOptions;
             this.db = db;
         }
 
