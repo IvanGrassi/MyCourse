@@ -29,12 +29,9 @@ namespace MyCourse
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)          //lega le interfacce ad implementazioni
         {
-#if DEBUG
-            services.AddLiveReload();
-#endif
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
-            //services.AddTransient<ICourseService, AdoNetCourseServices>();       //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
-            services.AddTransient<ICourseService, EfCoreCourseService>();          //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
+            services.AddTransient<ICourseService, AdoNetCourseServices>();       //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
+            //services.AddTransient<ICourseService, EfCoreCourseService>();          //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
             services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>();       //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
 
             //services.AddScoped<MyCourseDbContext>();        //permette di avere al massimo un istanza per ogni richiesta HTTP
@@ -50,23 +47,30 @@ namespace MyCourse
             //Opzioni (tipizzazione forte)
             services.Configure<ConnectionStringsOptions>(Configuration.GetSection("ConnectionStrings"));        //i valori vengono recuperati dal file appsettings.json, sezione ConnectionStrings
             services.Configure<CoursesOptions>(Configuration.GetSection("Courses"));                            //recupera le opzioni dalla classe dal file appsettings.json, sezione Courses
+#if DEBUG
+            services.AddLiveReload();
+#endif
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())                                        //il middleware viene usato solo quando siamo in ambiente development
+            //l'ambiente (production o development) viene definito nel launch.json
+            if (env.IsEnvironment("Development"))                                        //il middleware viene usato solo quando siamo in ambiente development
             {
-                app.UseDeveloperExceptionPage();                            //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
+                app.UseDeveloperExceptionPage();    //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
+#if DEBUG
+                app.UseLiveReload();
+#endif
+            }
+            else                                    //in tutti gli altri casi (es: Production)
+            {
+                app.UseExceptionHandler("/Error");  //il parametro fornito (es: /Courses/Details/5000) verrà sostituito da /Error comprendendo le info dell'eccezione
             }
 
-#if DEBUG
-            app.UseLiveReload();
-#endif
 
-            //l'ambiente (production o development) viene definito nel launchsettings.json
-
-            app.UseStaticFiles();                                           //middleware file statici (immagini ad esempio)
+            app.UseStaticFiles();                   //middleware file statici (immagini ad esempio)
 
             app.UseRouting();
 

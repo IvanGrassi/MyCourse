@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
 using MyCourse.Models.ViewModels;
 
@@ -9,38 +12,36 @@ namespace MyCourse.Models.Services.Application
 {
     public class EfCoreCourseService : ICourseService
     {
+        private readonly ILogger<EfCoreCourseService> logger;
         private readonly MyCourseDbContext dbContext;
+        private readonly IOptionsMonitor<CoursesOptions> coursesOptions;
 
-        public EfCoreCourseService(MyCourseDbContext dbContext)    //per esprimere la dipendenza del servizio applicativo dal servizio infrastutturale (MyCourseDbContext)
+        public EfCoreCourseService(ILogger<EfCoreCourseService> logger, MyCourseDbContext dbContext, IOptionsMonitor<CoursesOptions> coursesOptions)    //per esprimere la dipendenza del servizio applicativo dal servizio infrastutturale (MyCourseDbContext)
         {
+            this.coursesOptions = coursesOptions;
+            this.logger = logger;
             this.dbContext = dbContext;
         }
 
         public async Task<CourseDetailViewModel> GetCourseAsync(int id)
         {
-            CourseDetailViewModel viewModel = await dbContext.Courses
-                .Where(course => course.Id == id)
-                .Select(course => new CourseDetailViewModel
-                {
-                    Id = course.Id,
-                    Title = course.Title,
-                    Description = course.Description,
-                    Author = course.Author,
-                    ImagePath = course.ImagePath,
-                    Rating = course.Rating,
-                    CurrentPrice = course.CurrentPrice,
-                    FullPrice = course.FullPrice,
-                    Lessons = course.Lessons.Select(lesson => new LessonViewModel
-                    {
-                        Id = lesson.Id,
-                        Title = lesson.Title,
-                        Description = lesson.Description,
-                        Duration = lesson.Duration
-                    }).ToList()
-                })
+            IQueryable<CourseDetailViewModel> queryLinq = dbContext.Courses
                 .AsNoTracking()
-                .SingleAsync();      //restituisce il 1 elemento di un elenco, se é vuoto o più di uno, solleva un eccezione
-            //.FirstAsync();    //Restituisce il primo elemento, ma se l'elenco é vuoto solleva un eccezione
+                .Include(course => course.Lessons)
+                .Where(course => course.Id == id)
+                .Select(course => CourseDetailViewModel.FromEntity(course)); //Usando metodi statici come FromEntity, la query potrebbe essere inefficiente. Mantenere il mapping nella lambda oppure usare un extension method personalizzato
+
+            CourseDetailViewModel viewModel = await queryLinq.FirstOrDefaultAsync();
+            //.FirstOrDefaultAsync(); //Restituisce null se l'elenco è vuoto e non solleva mai un'eccezione
+            //.SingleOrDefaultAsync(); //Tollera il fatto che l'elenco sia vuoto e in quel caso restituisce null, oppure se l'elenco contiene più di 1 elemento, solleva un'eccezione
+            //.FirstAsync(); //Restituisce il primo elemento, ma se l'elenco è vuoto solleva un'eccezione
+
+            /*if (viewModel == null)
+            {
+                logger.LogWarning("Course {id} not found", id);
+                throw new CourseNotFoundException(id);
+            }*/
+
             return viewModel;
         }
 

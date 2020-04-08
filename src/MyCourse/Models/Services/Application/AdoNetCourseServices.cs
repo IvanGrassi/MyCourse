@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyCourse.Models.Exceptions;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
 using MyCourse.Models.ViewModels;
@@ -11,18 +13,22 @@ namespace MyCourse.Models.Services.Application
 {
     public class AdoNetCourseServices : ICourseService
     {
-
+        private readonly ILogger<AdoNetCourseServices> logger;
         private readonly IDatabaseAccess db;
-        private readonly IOptionsMonitor<CoursesOptions> CoursesOptions;
+        private readonly IOptionsMonitor<CoursesOptions> coursesOptions;
 
-        public AdoNetCourseServices(IDatabaseAccess db, IOptionsMonitor<CoursesOptions> CoursesOptions) //dipende dai due servizi infrastrutturali
+        public AdoNetCourseServices(ILogger<AdoNetCourseServices> logger, IDatabaseAccess db, IOptionsMonitor<CoursesOptions> coursesOptions) //dipende dai due servizi infrastrutturali
         {
-            this.CoursesOptions = CoursesOptions;
+            this.coursesOptions = coursesOptions;
+            this.logger = logger;
             this.db = db;
         }
 
         public async Task<CourseDetailViewModel> GetCourseAsync(int id)
         {
+
+            logger.LogInformation("Course {id} requested", id);     //permette di filtrare i log in base al valore degli id
+
             //la prima query carica il corso scelto al rispettivo id, la seconda invece carica tutte le lezioni legate all'id di quel corso
             //FormattableString separa la parte fissa dai suoi parametri
             FormattableString query = $@"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency 
@@ -37,7 +43,8 @@ namespace MyCourse.Models.Services.Application
             var courseTable = dataSet.Tables[0];
             if (courseTable.Rows.Count != 1)
             {
-                throw new InvalidOperationException($"Did not return exactly 1 row for Course {id}");
+                logger.LogWarning("Course {id} not found", id);     //messaggio di log, problema non grave
+                throw new CourseNotFoundException(id);
             }
             var courseRow = courseTable.Rows[0];            //leggiamo la riga (courseRow), la passiamo a FromDataRow che farà la mappatura tra il datarow restituendo un oggetto di tipo courseDetailViewModel
             var courseDetailViewModel = CourseDetailViewModel.FromDataRow(courseRow);
@@ -62,8 +69,8 @@ namespace MyCourse.Models.Services.Application
             var courseList = new List<CourseViewModel>();               //aggiungo CourseViewModel ad una lista
             foreach (DataRow courseRow in dataTable.Rows)               //il datatable contiene tutte le righe trovate e cicliamo tutte le Rows in un foreach
             {
-                CourseViewModel course = CourseViewModel.FromDataRow(courseRow);    //il metodo FromDataRow conterrà tutti i risultati ciclati e viene richamato. Il tutto mi fa ottenere un oggetto di tipo CourseViewModel
-                courseList.Add(course);                                 //ogni oggetto ciclato viene aggiunto alla lista                
+                CourseViewModel courseViewModel = CourseViewModel.FromDataRow(courseRow);    //il metodo FromDataRow conterrà tutti i risultati ciclati e viene richamato. Il tutto mi fa ottenere un oggetto di tipo CourseViewModel
+                courseList.Add(courseViewModel);                                 //ogni oggetto ciclato viene aggiunto alla lista                
             }
             return courseList;                                          //e alla fine ritorno il risultato completo
         }
