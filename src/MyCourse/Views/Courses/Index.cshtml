@@ -2,14 +2,14 @@
 <h1>@ViewData["Title"]</h1>
 
 @foreach(CourseViewModel course in Model) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
-{                                         //richiama gli elementi presenti in CourseViewModel che vengono richiamati in CourseService.cs   
+{                                         //richiama gli elementi presenti in CourseViewModel 
 <hr>
 <div class="row course">
     <div class="col-md-1"> 
         <img src="@course.ImagePath" width="52" height="52">    
     </div>
-    <div class="col-md-5">
-        <h2>@course.Title</h2>
+    <div class="col-md-5">  
+        <h2>@course.Title</h2>  
         <author>@course.Author</author>
     </div>
     <div class="col-md-2 rating" title="@course.Rating">  

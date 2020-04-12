@@ -48,7 +48,7 @@ namespace MyCourse.Models.Services.Infrastructure
                     using (var reader = await cmd.ExecuteReaderAsync())
                     {
                         var dataSet = new DataSet();                        //invio dei dati dal db strutturali al servizio applicativo 
-                        dataSet.EnforceConstraints = false;
+                        dataSet.EnforceConstraints = false;                 //Fix per evitare un bug del provider Microsoft.Data.Sqlite
 
                         //creaiamo un datatable per ogni table che abbiamo finché il reader non si chiude
                         do

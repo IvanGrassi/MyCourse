@@ -8,12 +8,14 @@ namespace MyCourse.Controllers
 {
     public class CoursesController : Controller
     {
+        //Gestisce le richieste degli utenti che vogliono visualizzare l'elenco o il dettaglio di un corso
+
         private readonly ICourseService courseService;
-        public CoursesController(ICourseService courseService)   //dipendenza del CoursesController dal Course service (senza questo non potrebbe funzionare)
+        public CoursesController(ICachedCourseService courseService)   //dipendenza del CoursesController dal Course service (senza questo non potrebbe funzionare)
         {
             this.courseService = courseService;
         }
-        public async Task<IActionResult> Index()        //Courses
+        public async Task<IActionResult> Index(string search, int page, string orderBy, bool ascending)        //Courses
         {
             ViewData["Title"] = "Catalogo dei corsi";   //titolo statico
 
