@@ -1,7 +1,33 @@
-@model List<CourseViewModel>    //rende fortemente tipizzata la view
-<h1>@ViewData["Title"]</h1>
+@model CourseListViewModel    //rende fortemente tipizzata la view su tutta la classe CourseListViewModel
+<div class="row">
+    <div class="col-md-8">
+        <h1>@ViewData["Title"]</h1>
+    </div>
+    <div class="col-md-4 d-flex align-items-center">
+        <form asp-asp-controller="Courses" asp-action="Index" method="Get"><!--Action Index del CoursesController, get invia tramite querystring -->
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Cerca ..." aria-label="Cerca..." aria-describedby="search-button" value="@Model.Input.Search">   
+                <!--search: nome della chiave digitato dall'utente e visibile nel link, model.input.search mi permette di vedere nel form il valore che ho cercato -->
+                <div class="input-group-append">
+                    <button class="input-group-text" id="search-button"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
-@foreach(CourseViewModel course in Model) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
+<div class="row">
+    <!--@Model.Input.Search mi permette di evitare che la chiave di ricerca vada persa-->
+    <!--Se il campo OrderBy del Model.Input = Title, mi devi restituire un senso invertito (!Model.Input.Ascending), altrimenti restituiscimi true-->
+    <!--Se il mio tipo di ordine é uguale a Title: se la visualizzazione é ascending, stampami la freccia "up", altrimenti "down"-->
+    <div class="col-md-1"></div>
+    <div class="col-md-5"><a asp-route-orderby="Title" asp-route-ascending="@(Model.Input.OrderBy == "Title" ? !Model.Input.Ascending : true)" asp-route-search="@Model.Input.Search">Titolo @if(Model.Input.OrderBy == "Title") {<i class="fas fa-caret-@(Model.Input.Ascending ? "up" : "down")"></i> }</a></div>
+    <div class="col-md-2"><a asp-route-orderby="Rating" asp-route-ascending="@(Model.Input.OrderBy == "Rating" ? !Model.Input.Ascending : true)" asp-route-search="@Model.Input.Search">Valutazione @if(Model.Input.OrderBy == "Rating") {<i class="fas fa-caret-@(Model.Input.Ascending ? "up" : "down")"></i> }</a></div>
+    <div class="col-md-2"><a asp-route-orderby="CurrentPrice" asp-route-ascending="@(Model.Input.OrderBy == "CurrentPrice" ? !Model.Input.Ascending : true)" asp-route-search="@Model.Input.Search">Prezzo @if(Model.Input.OrderBy == "CurrentPrice") {<i class="fas fa-caret-@(Model.Input.Ascending ? "up" : "down")"></i> }</a></div>
+    <div class="col-md-2"></div>
+</div>
+
+@foreach(CourseViewModel course in Model.Courses) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
 {                                         //richiama gli elementi presenti in CourseViewModel 
 <hr>
 <div class="row course">
@@ -38,4 +64,19 @@
     </div>
 </div>
 }
+
+<!--b-pagination-->
+<nav aria-label="Paginazione">
+    <ul class="pagination d-flex justify-content-center mt-3">
+        <li class="page-item active" aria-current="page">
+            <a class="page-link" asp-route-page="1">Page 1 <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" asp-route-page="2">Page 2</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" asp-route-page="3">Page 3</a>
+        </li>
+    </ul>
+</nav>
 

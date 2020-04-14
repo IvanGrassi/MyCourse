@@ -9,9 +9,10 @@ namespace MyCourse.Models.Options
 
     //contiene le opzioni relative al corso (paging, opzioni per ordinare i campi)
 
+    //classe autogenerata derivante dall'appsettings.json (Paste json as code)
     public partial class CoursesOptions
     {
-        public long PerPage { get; set; }
+        public int PerPage { get; set; }
 
         public CoursesOrderOptions Order { get; set; }
     }

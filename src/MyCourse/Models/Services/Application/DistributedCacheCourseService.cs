@@ -5,16 +5,24 @@ using Microsoft.Extensions.Caching.Distributed;
 using MyCourse.Models.ViewModels;
 using Newtonsoft.Json;
 
+/*
 namespace MyCourse.Models.Services.Application
 {
+
     public class DistributedCacheCourseService : ICachedCourseService
     {
         //Implementa cio che é contenuto in ICachedCourseService
 
+        public DistributedCacheCourseService(ICourseService courseService)
+        {
+            this.courseService = courseService;
+
+        }
         public ICourseService courseService { get; }
         private readonly IDistributedCache distributedCache;
 
         //viene utilizzata nell'ambito della scalabilità orizzontale su più apparecchi
+
 
         public DistributedCacheCourseService(ICourseService courseService, IDistributedCache distributedCache)
         {
@@ -23,7 +31,6 @@ namespace MyCourse.Models.Services.Application
             this.courseService = courseService;
             this.distributedCache = distributedCache;
         }
-
 
         public async Task<CourseDetailViewModel> GetCourseAsync(int id)
         {
@@ -58,7 +65,7 @@ namespace MyCourse.Models.Services.Application
             return course;
         }
 
-        public async Task<List<CourseViewModel>> GetCoursesAsync()
+        public async Task<List<CourseViewModel>> GetCoursesAsync(string search, int page, string orderBy, bool ascending)
         {
             string key = $"Courses";
             string serializedObject = await distributedCache.GetStringAsync(key);
@@ -68,13 +75,11 @@ namespace MyCourse.Models.Services.Application
                 return Deserialize<List<CourseViewModel>>(serializedObject);
             }
             //Recupera la lista dal db, prima di restituirla però la serializzo
-            List<CourseViewModel> courses = await courseService.GetCoursesAsync();
+            List<CourseViewModel> courses = await courseService.GetCoursesAsync(search, page, orderBy, ascending);
             serializedObject = Serialize(courses);
-
 
             var cacheOptions = new DistributedCacheEntryOptions();
             cacheOptions.SetAbsoluteExpiration(TimeSpan.FromSeconds(60));
-
 
             await distributedCache.SetStringAsync(key, serializedObject, cacheOptions);
             return courses;
@@ -91,5 +96,8 @@ namespace MyCourse.Models.Services.Application
             //Riconvertiamo una stringa JSON in un oggetto
             return JsonConvert.DeserializeObject<T>(serializedObject);
         }
+
     }
+
 }
+*/

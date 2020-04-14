@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyCourse.Models.Exceptions;
+using MyCourse.Models.InputModels;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
+using MyCourse.Models.ValueTypes;
 using MyCourse.Models.ViewModels;
 
 namespace MyCourse.Models.Services.Application
@@ -27,7 +30,7 @@ namespace MyCourse.Models.Services.Application
         public async Task<CourseDetailViewModel> GetCourseAsync(int id)
         {
 
-            logger.LogInformation("Course {id} requested", id);     //permette di filtrare i log in base al valore degli id
+            logger.LogInformation("Course {id} requested", id); //permette di filtrare i log in base al valore degli id
 
             //la prima query carica il corso scelto al rispettivo id, la seconda invece carica tutte le lezioni legate all'id di quel corso
             //FormattableString separa la parte fissa dai suoi parametri
@@ -43,10 +46,10 @@ namespace MyCourse.Models.Services.Application
             var courseTable = dataSet.Tables[0];
             if (courseTable.Rows.Count != 1)
             {
-                logger.LogWarning("Course {id} not found", id);     //messaggio di log, problema non grave
+                logger.LogWarning("Course {id} not found", id); //messaggio di log, problema non grave
                 throw new CourseNotFoundException(id);
             }
-            var courseRow = courseTable.Rows[0];            //leggiamo la riga (courseRow), la passiamo a FromDataRow che farà la mappatura tra il datarow restituendo un oggetto di tipo courseDetailViewModel
+            var courseRow = courseTable.Rows[0]; //leggiamo la riga (courseRow), la passiamo a FromDataRow che farà la mappatura tra il datarow restituendo un oggetto di tipo courseDetailViewModel
             var courseDetailViewModel = CourseDetailViewModel.FromDataRow(courseRow);
 
             //Lessons
@@ -55,24 +58,26 @@ namespace MyCourse.Models.Services.Application
             foreach (DataRow lessonRow in lessonDataTable.Rows)
             {
                 LessonViewModel lessonViewModel = LessonViewModel.FromDataRow(lessonRow);
-                courseDetailViewModel.Lessons.Add(lessonViewModel);     //ogni oggetto di LessonViewModel trovato viene aggiunto alla lista
+                courseDetailViewModel.Lessons.Add(lessonViewModel); //ogni oggetto di LessonViewModel trovato viene aggiunto alla lista
             }
             return courseDetailViewModel;
         }
 
-        public async Task<List<CourseViewModel>> GetCoursesAsync()
+        public async Task<List<CourseViewModel>> GetCoursesAsync(CourseListInputModel model)
         {
+            string direction = model.Ascending ? "ASC" : "DESC";  //se é true restituisce ASC, se é false: DESC
+
             //quali informazioni estrarre nei confronti di un database? eseguo una query
-            FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency from Courses";
+            FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Title LIKE {" % " + model.Search + " % "} ORDER BY {(Sql)model.OrderBy} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset}";
             DataSet dataset = await db.ExecuteQueryAsync(query);
-            var dataTable = dataset.Tables[0];                          //primo datatable
-            var courseList = new List<CourseViewModel>();               //aggiungo CourseViewModel ad una lista
-            foreach (DataRow courseRow in dataTable.Rows)               //il datatable contiene tutte le righe trovate e cicliamo tutte le Rows in un foreach
+            var dataTable = dataset.Tables[0]; //primo datatable
+            var courseList = new List<CourseViewModel>(); //aggiungo CourseViewModel ad una lista
+            foreach (DataRow courseRow in dataTable.Rows) //il datatable contiene tutte le righe trovate e cicliamo tutte le Rows in un foreach
             {
-                CourseViewModel courseViewModel = CourseViewModel.FromDataRow(courseRow);    //il metodo FromDataRow conterrà tutti i risultati ciclati e viene richamato. Il tutto mi fa ottenere un oggetto di tipo CourseViewModel
-                courseList.Add(courseViewModel);                                 //ogni oggetto ciclato viene aggiunto alla lista                
+                CourseViewModel courseViewModel = CourseViewModel.FromDataRow(courseRow); //il metodo FromDataRow conterrà tutti i risultati ciclati e viene richamato. Il tutto mi fa ottenere un oggetto di tipo CourseViewModel
+                courseList.Add(courseViewModel); //ogni oggetto ciclato viene aggiunto alla lista                
             }
-            return courseList;                                          //e alla fine ritorno il risultato completo
+            return courseList; //e alla fine ritorno il risultato completo
         }
     }
 }

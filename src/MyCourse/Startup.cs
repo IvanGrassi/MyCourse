@@ -45,8 +45,8 @@ namespace MyCourse
                 options.CacheProfiles.Add("Home", homeProfile);
             }).AddRazorRuntimeCompilation();
 
-            services.AddTransient<ICourseService, AdoNetCourseServices>();                  //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
-            //services.AddTransient<ICourseService, EfCoreCourseService>();                 //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
+            //services.AddTransient<ICourseService, AdoNetCourseServices>();                  //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
+            services.AddTransient<ICourseService, EfCoreCourseService>();                 //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
             services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>();                //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
             services.AddTransient<ICachedCourseService, MemoryCacheCourseService>();        //ogni volta che un componente ha una dipendenza da ICachedCourseService, dotnetcore inietterà un istanza di MemoryCacheCourseService
 
@@ -95,14 +95,16 @@ namespace MyCourse
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             //l'ambiente (production o development) viene definito nel launch.json
-            if (env.IsEnvironment("Development"))                                        //il middleware viene usato solo quando siamo in ambiente development
+            if (env.IsDevelopment())                                        //il middleware viene usato solo quando siamo in ambiente development
             {
-                app.UseDeveloperExceptionPage();    //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
-#if DEBUG
-                app.UseLiveReload();
-#endif
+                app.UseDeveloperExceptionPage();                            //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
             }
-            else                                    //in tutti gli altri casi (es: Production)
+
+#if DEBUG
+            app.UseLiveReload();
+#endif
+
+            if (env.IsStaging() || env.IsProduction())                                   //in tutti gli altri casi (es: Production)
             {
                 app.UseExceptionHandler("/Error");  //il parametro fornito (es: /Courses/Details/5000) verrà sostituito da /Error comprendendo le info dell'eccezione
             }

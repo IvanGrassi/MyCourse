@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyCourse.Models.Options;
+using MyCourse.Models.ValueTypes;
 
 namespace MyCourse.Models.Services.Infrastructure
 {
@@ -30,6 +31,10 @@ namespace MyCourse.Models.Services.Infrastructure
             var sqlLiteParameters = new List<SqliteParameter>();              //creiamo una lista di parametri (Sqliteparameters)
             for (var i = 0; i < queryArguments.Length; i++)                   //cicla tutti gli argomenti (i due id)
             {
+                if (queryArguments[i] is Sql)
+                {   //se l'argomento é di tipo sql, non creare il sqlLiteParameter
+                    continue;
+                }
                 var parameter = new SqliteParameter(i.ToString(), queryArguments[i]);
                 sqlLiteParameters.Add(parameter);
                 queryArguments[i] = "@" + i;                                  //il param. viene aggiunto alla lista e davanti a ogni param. viene aggiunta la @ (quindi diventa id = @id. ad es: id = @5)
