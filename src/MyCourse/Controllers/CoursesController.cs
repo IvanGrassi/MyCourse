@@ -18,15 +18,15 @@ namespace MyCourse.Controllers
         }
         public async Task<IActionResult> Index(CourseListInputModel input) //Courses
         {
-            ViewData["Title"] = "Catalogo dei corsi"; //titolo statico
+            ViewData["Title"] = "Catalogo dei corsi";   //titolo statico
 
-            //invochiamo il suo metodo GetCourses per ottenere l'elenco dei corsi
-            List<CourseViewModel> courses = await courseService.GetCoursesAsync(input);
+            //invochiamo il suo metodo GetCourses per ottenere l'elenco dei corsi dal CourseViewModel
+            ListViewModel<CourseViewModel> courses = await courseService.GetCoursesAsync(input);
 
             CourseListViewModel viewModel = new CourseListViewModel
             {
-                Courses = courses,      //valorizziamo i dati come ci sono stati restituiti dal servizio applicativo
-                Input = input           //l'input ricevuto dall'utente arriverà anche alla view
+                Courses = courses,                      //valorizziamo i dati come ci sono stati restituiti dal servizio applicativo (contiene i risultati)
+                Input = input                           //l'input ricevuto dall'utente arriverà anche alla view
             };
 
             return View(viewModel); //va a cercare una view chiamata Index.cshtml in courses e gli passa i dati ottenuti tramite metodo
@@ -36,7 +36,7 @@ namespace MyCourse.Controllers
         {
             CourseDetailViewModel viewModel = await courseService.GetCourseAsync(id); //attenzione, con questo metodo ottengo il dettaglio di un solo corso
 
-            ViewData["Title"] = viewModel.Title; //Action: viewModel.Title = 5 (Esempio) e carico il suo titolo
+            ViewData["Title"] = viewModel.Title;        //Action: viewModel.Title = 5 (Esempio) e carico il suo titolo
             return View(viewModel);
         }
     }

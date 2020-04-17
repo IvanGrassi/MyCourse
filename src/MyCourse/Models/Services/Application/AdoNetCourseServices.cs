@@ -63,21 +63,62 @@ namespace MyCourse.Models.Services.Application
             return courseDetailViewModel;
         }
 
-        public async Task<List<CourseViewModel>> GetCoursesAsync(CourseListInputModel model)
+        public async Task<ListViewModel<CourseViewModel>> GetCoursesAsync(CourseListInputModel model)
         {
+            string orderBy = model.OrderBy == "CurrentPrice" ? "CurrentPrice_Amount" : model.OrderBy;
             string direction = model.Ascending ? "ASC" : "DESC";  //se é true restituisce ASC, se é false: DESC
 
             //quali informazioni estrarre nei confronti di un database? eseguo una query
-            FormattableString query = $"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Title LIKE {" % " + model.Search + " % "} ORDER BY {(Sql)model.OrderBy} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset}";
-            DataSet dataset = await db.ExecuteQueryAsync(query);
-            var dataTable = dataset.Tables[0]; //primo datatable
+            FormattableString query = $@"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql)orderBy} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset};
+            SELECT COUNT(*) FROM Courses WHERE Title LIKE {"%" + model.Search + "%"}";
+            DataSet dataSet = await db.ExecuteQueryAsync(query);
+            var dataTable = dataSet.Tables[0]; //primo datatable
             var courseList = new List<CourseViewModel>(); //aggiungo CourseViewModel ad una lista
             foreach (DataRow courseRow in dataTable.Rows) //il datatable contiene tutte le righe trovate e cicliamo tutte le Rows in un foreach
             {
                 CourseViewModel courseViewModel = CourseViewModel.FromDataRow(courseRow); //il metodo FromDataRow conterrà tutti i risultati ciclati e viene richamato. Il tutto mi fa ottenere un oggetto di tipo CourseViewModel
                 courseList.Add(courseViewModel); //ogni oggetto ciclato viene aggiunto alla lista                
             }
-            return courseList; //e alla fine ritorno il risultato completo
+
+            //creo un istanza dell'oggetto
+            ListViewModel<CourseViewModel> result = new ListViewModel<CourseViewModel>
+            {
+                Results = courseList,   //rappresenta l'elenco dei corsi (paginato a 10 corsi per pagina)
+                TotalCount = Convert.ToInt32(dataSet.Tables[1].Rows[0][0])        //leggo il secondo dataset [1] dove viene eseguita la seconda query e della prima riga ottengo i valore della prima colonna, totale di tutti i corsi
+            };
+
+            return result;
+        }
+
+        //----------------------------------------------------------------------
+        //I due metodi rappresentano valori preimpostati e non manipolabili dall'utente
+        public async Task<List<CourseViewModel>> GetBestRatingCoursesAsync()
+        {
+            CourseListInputModel inputModel = new CourseListInputModel(         //creo l'istanza
+                search: "",
+                page: 1,
+                orderBy: "Rating",
+                ascending: false,
+                limit: coursesOptions.CurrentValue.InHome,  //rappresenta il totale dei corsi che verranno visualizzati (definito in appsettings.json)
+                orderOptions: coursesOptions.CurrentValue.Order);
+
+            //e la fornisco al metodo GetCourseAsync
+            ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
+            return result.Results;
+        }
+
+        public async Task<List<CourseViewModel>> GetMostRecentCoursesAsync()
+        {
+            CourseListInputModel inputModel = new CourseListInputModel(
+                search: "",
+                page: 1,
+                orderBy: "Id",  //sarebbe meglio per data di pubblicazione
+                ascending: false,
+                limit: coursesOptions.CurrentValue.InHome,
+                orderOptions: coursesOptions.CurrentValue.Order);
+
+            ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
+            return result.Results;
         }
     }
 }

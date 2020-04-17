@@ -10,8 +10,13 @@ namespace MyCourse.Models.Services.Application
         //a differenza di una classe NON contiene logica, ma si limita a definire un elenco
         //di proprietà, metodi ed eventi.
 
-        Task<List<CourseViewModel>> GetCoursesAsync(CourseListInputModel model);
+        Task<ListViewModel<CourseViewModel>> GetCoursesAsync(CourseListInputModel model);
 
         Task<CourseDetailViewModel> GetCourseAsync(int id);
+
+
+
+        Task<List<CourseViewModel>> GetMostRecentCoursesAsync();
+        Task<List<CourseViewModel>> GetBestRatingCoursesAsync();
     }
 }

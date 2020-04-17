@@ -15,10 +15,10 @@ namespace MyCourse.Models.InputModels
 
 
         //il costruttore fornisce i dati grezzi che verranno sanitizzati
-        public CourseListInputModel(string search, int page, string orderBy, bool ascending, CoursesOptions coursesOptions)
+        public CourseListInputModel(string search, int page, string orderBy, bool ascending, int limit, CoursesOrderOptions orderOptions)
         {
             //Sanitizzazione
-            var orderOptions = coursesOptions.Order;    //fornito dal model binder personalizzato
+            //var orderOptions = coursesOptions.Order;    //fornito dal model binder personalizzato
             if (!orderOptions.Allow.Contains(orderBy))  //se nell'oggetto orderOptions, la proprietà allow NON contiene order by (guardare appsettings.json)
             {
                 orderBy = orderOptions.By; //altrimenti viene assegnato il valore di default della configurazione
@@ -27,12 +27,12 @@ namespace MyCourse.Models.InputModels
 
             Search = search ?? ""; //null coalescensing opeator: si assicura che search non assuma valori nulli (search = search), se é nullo invece riporta ""
             Page = Math.Max(1, page); //mi dai il maggiore fra queti due numeri
+            Limit = Math.Max(1, limit); //recupera la configurazione corrente (CurrentValue) dalla classe CoursesOptions
             OrderBy = orderBy;
             Ascending = ascending;
 
             //---------------------------------
 
-            Limit = coursesOptions.PerPage; //recupera la configurazione corrente (CurrentValue) dalla classe CoursesOptions
             Offset = (Page - 1) * Limit;
         }
 

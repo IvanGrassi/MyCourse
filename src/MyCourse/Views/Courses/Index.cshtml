@@ -27,8 +27,8 @@
     <div class="col-md-2"></div>
 </div>
 
-@foreach(CourseViewModel course in Model.Courses) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
-{                                         //richiama gli elementi presenti in CourseViewModel 
+@foreach(CourseViewModel course in Model.Courses.Results) //foreach produce il codice a seguire per ogni corso trovato all'interno del Model
+{                                                           //richiama gli elementi presenti in CourseViewModel 
 <hr>
 <div class="row course">
     <div class="col-md-1"> 
@@ -65,18 +65,46 @@
 </div>
 }
 
+
 <!--b-pagination-->
+@{
+    //ad esempio se ho 32 corsi e limite di 10 ottengo 3.2 e tramite ceiling approssimo a 4 (pagine)
+    int totalPages = (int)Math.Ceiling(Model.Courses.TotalCount / (decimal) Model.Input.Limit);
+    int currentPage = Model.Input.Page;
+}
 <nav aria-label="Paginazione">
     <ul class="pagination d-flex justify-content-center mt-3">
-        <li class="page-item active" aria-current="page">
-            <a class="page-link" asp-route-page="1">Page 1 <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" asp-route-page="2">Page 2</a>
-        </li>
-        <li class="page-item">
-            <a class="page-link" asp-route-page="3">Page 3</a>
-        </li>
+        @if(currentPage > 1)
+        {
+            //link per tornare alla pagina precedente
+            <li class="page-item">
+                <a class="page-link" asp-route-page="@(currentPage-1)" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending"><i class="fas fa-angle-left"></i></a>
+            </li>   
+        }
+        <!--Mostro 4 link prima della pagina su cui mi trovo, valore minimo 1, verrà selezionato uno dei due valori-->
+        <!--Mostro 4 link dopo la pagina corrente, con il Min, p non cresce mai oltre il numero totale di pagine-->
+        @for(int p = Math.Max(1, currentPage-4); p <= Math.Min(totalPages, currentPage+4); p++)
+        {
+            //se p é la pagina su cui mi trovo, il bottone sarà "attivo"
+            if(p == currentPage)
+            {
+                <li class="page-item active" aria-current="page">
+                    <a class="page-link" asp-route-page="@p" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending">@p <span class="sr-only">(current)</span></a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-route-page="@p" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending">@p</a>
+                </li>
+            }
+        }
+        @if(currentPage < totalPages)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-route-page="@(currentPage+1)" asp-route-search="@Model.Input.Search" asp-route-orderby="@Model.Input.OrderBy" asp-route-ascending="@Model.Input.Ascending"><i class="fas fa-angle-right"></i></a>
+            </li>   
+        }
     </ul>
 </nav>
 

@@ -69,3 +69,22 @@ footer {
 .course-lessons .course-duration {
   font-weight: bold;
 }
+
+/*Homepage, corsi più visitati e più recenti*/
+
+section + section {
+  margin-top: 2em;
+}
+.jumbotron {
+  background-image: url("/Home/homebg.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.jumbotron h1 {
+  font-size: 3.5rem;
+  color: white;
+}
+
+.jumbotron .lead {
+  color: white;
+}

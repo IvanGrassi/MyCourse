@@ -14,6 +14,8 @@ namespace MyCourse.Models.Options
     {
         public int PerPage { get; set; }
 
+        public int InHome { get; set; }
+
         public CoursesOrderOptions Order { get; set; }
     }
 

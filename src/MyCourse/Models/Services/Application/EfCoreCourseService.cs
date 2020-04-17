@@ -49,7 +49,7 @@ namespace MyCourse.Models.Services.Application
             return viewModel;
         }
 
-        public async Task<List<CourseViewModel>> GetCoursesAsync(CourseListInputModel model)
+        public async Task<ListViewModel<CourseViewModel>> GetCoursesAsync(CourseListInputModel model)
         {
 
             IQueryable<Course> baseQuery = dbContext.Courses;
@@ -101,15 +101,59 @@ namespace MyCourse.Models.Services.Application
             //per ogni proprietà trovata nel CourseViewModel, dobbiamo assegnare il valore trovato nell'entità course
             IQueryable<CourseViewModel> queryLinq = baseQuery
                 .Where(course => course.Title.Contains(model.Search)) //che contiene il valore di search (ciò che cerca l'utente)
-                .Skip(model.Offset)
-                .Take(model.Limit)
                 .AsNoTracking()
                 .Select(course => CourseViewModel.FromEntity(course));
 
-            //qui avviene l'esecuzione della query
-            List<CourseViewModel> courses = await queryLinq.ToListAsync(); //invoco IQueryable ad una List di CourseViewModel, EFC apre la connessione con il Db per inviare la query 
 
-            return courses;
+            List<CourseViewModel> courses = await queryLinq     //vogliamo ottenere la lista dei corsi (skip e take agiscono qui)
+                .Take(model.Limit)
+                .Skip(model.Offset)
+
+                .ToListAsync(); //invoco IQueryable ad una List di CourseViewModel, EFC apre la connessione con il Db per inviare la query 
+
+
+            int totalCount = await queryLinq.CountAsync();      //Conteggio di tutti i corsi esistenti
+
+            //creo un istanza dell'oggetto
+            ListViewModel<CourseViewModel> result = new ListViewModel<CourseViewModel>
+            {
+                Results = courses,          //contiene la lista dei corsi (paginata a 10 corsi per pagina)
+                TotalCount = totalCount
+            };
+
+            return result;
+        }
+
+        //-----------------------------------------------------------------------------------
+        //I due metodi rappresentano valori preimpostati e non manipolabili dall'utente
+        public async Task<List<CourseViewModel>> GetBestRatingCoursesAsync()
+        {
+            CourseListInputModel inputModel = new CourseListInputModel(         //creo l'istanza
+                search: "",
+                page: 1,
+                orderBy: "Rating",
+                ascending: false,
+                limit: coursesOptions.CurrentValue.InHome,  //rappresenta il totale dei corsi che verranno visualizzati (definito in appsettings.json)
+                orderOptions: coursesOptions.CurrentValue.Order);
+
+            //e la fornisco al metodo GetCourseAsync
+            ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
+            return result.Results;
+        }
+
+
+        public async Task<List<CourseViewModel>> GetMostRecentCoursesAsync()
+        {
+            CourseListInputModel inputModel = new CourseListInputModel(
+                search: "",
+                page: 1,
+                orderBy: "Id",  //sarebbe meglio per data di pubblicazione
+                ascending: false,
+                limit: coursesOptions.CurrentValue.InHome,
+                orderOptions: coursesOptions.CurrentValue.Order);
+
+            ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
+            return result.Results;
         }
     }
 }

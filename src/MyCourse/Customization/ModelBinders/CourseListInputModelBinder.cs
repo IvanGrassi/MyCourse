@@ -25,7 +25,7 @@ namespace MyCourse.Customization.ModelBinders
 
             //Costruisco l'istanza del CourseListInputModel
             CoursesOptions options = coursesOptions.CurrentValue;
-            var inputModel = new CourseListInputModel(search, page, orderBy, ascending, coursesOptions.CurrentValue);
+            var inputModel = new CourseListInputModel(search, page, orderBy, ascending, options.PerPage, options.Order);
 
             //Impostiamo il risultato per notificare che la creazione è avvenuta con successo
             bindingContext.Result = ModelBindingResult.Success(inputModel);

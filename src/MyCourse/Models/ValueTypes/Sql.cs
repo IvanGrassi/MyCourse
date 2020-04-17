@@ -4,7 +4,7 @@ using MyCourse.Models.Enums;
 namespace MyCourse.Models.ValueTypes
 {
     //Questa classe serve unicamente per indicare al servizio infrastrutturale SqliteAccessor
-    //che un dato parametro NON deve essere convertito in SqliteParameter
+    //che un dato parametro non deve essere convertito in SqliteParameter
     public class Sql
     {
         private Sql(string value)

@@ -9,7 +9,7 @@ namespace MyCourse.Models.ViewModels
         //CourseListViewModel verrà poi utilizzato nelle classi .cshtml
 
         //fornisce l'elenco dei corsi
-        public List<CourseViewModel> Courses { get; set; }
+        public ListViewModel<CourseViewModel> Courses { get; set; }
 
         //fornisce l'input dell'utente
         public CourseListInputModel Input { get; set; }
