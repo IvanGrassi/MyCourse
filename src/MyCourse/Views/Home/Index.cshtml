@@ -13,82 +13,17 @@
 
 <section>
     <h2>Aggiunti di recente</h2>
-    @foreach(var course in Model.MostRecentCourses)
-    {
-        <hr>
-        <div class="row course">
-            <div class="col-md-1"> 
-                <img src="@course.ImagePath" width="52" height="52">    
-            </div>
-            <div class="col-md-5">  
-                <h2>@course.Title</h2>  
-                <author>@course.Author</author>
-            </div>
-            <div class="col-md-2 rating" title="@course.Rating">  
-                @for(int i = 1; i <= 5; i++){
-                    if(course.Rating >= i)          //es: 4.5 > 1, poi incremento: 4.5 > 2, ecc.., 4.5 < 5, stampa la stella intera
-                    {
-                        <i class="fas fa-star"></i>
-                    }
-                    else if (course.Rating > i -1) //es: 4.5 > 5-1(4), allora stampa la stella a metà
-                    {
-                        <i class="fas fa-star-half-alt"></i>
-                    }
-                    else{                           //in tutti gli altri casi: stella vuota
-                        <i class="far fa-star"></i>
-                    }
-                }
-            </div>
-            <div class="col-md-2 price">
-                @course.CurrentPrice
-                @if(!course.CurrentPrice.Equals(course.FullPrice)){  //se i prezzi non sono uguali, allora stampami anche il prezzo intero
-                    <br/><s>@course.FullPrice</s>
-                }
-            </div>
-            <div class="col-md-2 d-flex align-items-center">
-                <a class="btn btn-outline-primary" asp-action="Detail" asp-route-id="@course.Id">Dettaglio</a>   
-            </div>
-        </div>
+    @foreach(CourseViewModel course in Model.MostRecentCourses)
+    {   //qua mettiamo il collegamento alla partial view (_CourseLine.cshtml)
+        
+        <partial name="Courses/_CourseLine" model="@course"></partial>
     }
 </section>    
 
 <section>
     <h2>I migliori di sempre</h2>
-    @foreach(var course in Model.BestRatingCourses)
+    @foreach(CourseViewModel course in Model.BestRatingCourses)
     {
-        <hr>
-        <div class="row course">
-            <div class="col-md-1"> 
-                <img src="@course.ImagePath" width="52" height="52">    
-            </div>
-            <div class="col-md-5">  
-                <h2>@course.Title</h2>  
-                <author>@course.Author</author>
-            </div>
-            <div class="col-md-2 rating" title="@course.Rating">  
-                @for(int i = 1; i <= 5; i++){
-                    if(course.Rating >= i)          //es: 4.5 > 1, poi incremento: 4.5 > 2, ecc.., 4.5 < 5, stampa la stella intera
-                    {
-                        <i class="fas fa-star"></i>
-                    }
-                    else if (course.Rating > i -1) //es: 4.5 > 5-1(4), allora stampa la stella a metà
-                    {
-                        <i class="fas fa-star-half-alt"></i>
-                    }
-                    else{                           //in tutti gli altri casi: stella vuota
-                        <i class="far fa-star"></i>
-                    }
-                }
-            </div>
-            <div class="col-md-2 price">
-                @course.CurrentPrice
-                @if(!course.CurrentPrice.Equals(course.FullPrice)){  //se i prezzi non sono uguali, allora stampami anche il prezzo intero
-                    <br/><s>@course.FullPrice</s>
-                }
-            </div>
-            <div class="col-md-2 d-flex align-items-center">
-                <a class="btn btn-outline-primary" asp-action="Detail" asp-route-id="@course.Id">Dettaglio</a>   
-            </div>
-        </div>
+        <partial name="Courses/_CourseLine" model="@course"></partial>
     }
 </section>

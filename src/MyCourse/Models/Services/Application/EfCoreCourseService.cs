@@ -102,7 +102,17 @@ namespace MyCourse.Models.Services.Application
             IQueryable<CourseViewModel> queryLinq = baseQuery
                 .Where(course => course.Title.Contains(model.Search)) //che contiene il valore di search (ciò che cerca l'utente)
                 .AsNoTracking()
-                .Select(course => CourseViewModel.FromEntity(course));
+                .Select(course =>
+                new CourseViewModel
+                {
+                    Id = course.Id,
+                    Title = course.Title,
+                    ImagePath = course.ImagePath,
+                    Author = course.Author,
+                    Rating = course.Rating,
+                    CurrentPrice = course.CurrentPrice,
+                    FullPrice = course.FullPrice
+                });
 
 
             List<CourseViewModel> courses = await queryLinq     //vogliamo ottenere la lista dei corsi (skip e take agiscono qui)
