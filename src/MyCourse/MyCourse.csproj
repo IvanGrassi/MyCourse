@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>MyCourse</UserSecretsId>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Models/Services/Application/CourseService.cs" /> <!--Non compilo più questo file statico per l'ottenimento dei dati-->    
@@ -10,6 +11,7 @@
     
     <ItemGroup>
     <PackageReference Include="Alachisoft.NCache.OpenSource.SDK" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.1" />
     <PackageReference Include="Microsoft.Data.SQLite" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="3.1.0" Condition="'$(Configuration)' == 'Debug'" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2">

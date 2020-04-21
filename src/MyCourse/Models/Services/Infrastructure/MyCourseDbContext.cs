@@ -34,7 +34,10 @@ namespace MyCourse.Models.Services.Infrastructure
                     builder.Property(money => money.Currency)
                     .HasConversion<string>()                  //converte la stringa in enum
                     .HasColumnName("CurrentPrice_Currency");   //permette di fare il mapping delle due proprietà di Money
-                    builder.Property(money => money.Amount).HasColumnName("CurrentPrice_Amount");
+                    
+                    builder.Property(money => money.Amount)
+                    .HasConversion<float>()
+                    .HasColumnName("CurrentPrice_Amount");
                 });  //own type Money (che contiene)
 
                 //Full price

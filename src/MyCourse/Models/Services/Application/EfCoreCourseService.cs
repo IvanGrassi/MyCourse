@@ -54,55 +54,30 @@ namespace MyCourse.Models.Services.Application
 
             IQueryable<Course> baseQuery = dbContext.Courses;
 
-            switch (model.OrderBy)
+            baseQuery = (model.OrderBy, model.Ascending) switch
             {
-                case "Title":
-                    if (model.Ascending)    //ascending = true e ordino ASC
-                    {
-                        baseQuery = baseQuery.OrderBy(course => course.Title);
-                    }
-                    else    //Altrimenti DESC
-                    {
-                        baseQuery = baseQuery.OrderByDescending(course => course.Title);
-                    }
-                    break;
-                case "Rating":
-                    if (model.Ascending)
-                    {
-                        baseQuery = baseQuery.OrderBy(course => course.Rating);
-                    }
-                    else
-                    {
-                        baseQuery = baseQuery.OrderByDescending(course => course.Rating);
-                    }
-                    break;
-                case "CurrentPrice":
-                    if (model.Ascending)
-                    {
-                        baseQuery = baseQuery.OrderBy(course => (double)course.CurrentPrice.Amount);
-                    }
-                    else
-                    {
-                        baseQuery = baseQuery.OrderByDescending(course => (double)course.CurrentPrice.Amount);
-                    }
-                    break;
-                case "Id":
-                    if (model.Ascending)
-                    {
-                        baseQuery = baseQuery.OrderBy(course => course.Id);
-                    }
-                    else
-                    {
-                        baseQuery = baseQuery.OrderByDescending(course => course.Id);
-                    }
-                    break;
-            }
+                ("Title", true) => baseQuery.OrderBy(course => course.Title),
+                ("Title", false) => baseQuery.OrderByDescending(course => course.Title),               
+                ("Rating", true) => baseQuery.OrderBy(course => course.Rating),
+                ("Rating", false) => baseQuery.OrderByDescending(course => course.Rating),
+                ("CurrentPrice", true) => baseQuery.OrderBy(course => course.CurrentPrice.Amount),
+                ("CurrentPrice", false) => baseQuery.OrderByDescending(course => course.CurrentPrice.Amount),
+                ("Id", true) => baseQuery.OrderBy(course => course.Id),
+                ("Id", false) => baseQuery.OrderByDescending(course => course.Id),
+                _ => baseQuery
+            };
 
             //per ogni proprietà trovata nel CourseViewModel, dobbiamo assegnare il valore trovato nell'entità course
-            IQueryable<CourseViewModel> queryLinq = baseQuery
+            IQueryable<Course> queryLinq = baseQuery
                 .Where(course => course.Title.Contains(model.Search)) //che contiene il valore di search (ciò che cerca l'utente)
-                .AsNoTracking()
-                .Select(course =>
+                .AsNoTracking();
+
+
+            List<CourseViewModel> courses = await queryLinq     //vogliamo ottenere la lista dei corsi (skip e take agiscono qui)
+                .Skip(model.Offset)
+                .Take(model.Limit)
+                .Select(course => CourseViewModel.FromEntity(course))
+                /*.Select(course =>
                 new CourseViewModel
                 {
                     Id = course.Id,
@@ -112,13 +87,7 @@ namespace MyCourse.Models.Services.Application
                     Rating = course.Rating,
                     CurrentPrice = course.CurrentPrice,
                     FullPrice = course.FullPrice
-                });
-
-
-            List<CourseViewModel> courses = await queryLinq     //vogliamo ottenere la lista dei corsi (skip e take agiscono qui)
-                .Take(model.Limit)
-                .Skip(model.Offset)
-
+                })*/
                 .ToListAsync(); //invoco IQueryable ad una List di CourseViewModel, EFC apre la connessione con il Db per inviare la query 
 
 

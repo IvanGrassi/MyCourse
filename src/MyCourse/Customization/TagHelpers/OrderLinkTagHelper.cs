@@ -26,7 +26,7 @@ namespace MyCourse.Customization.TagHelpers
 
             //Imposto i valori del link, indico all' anchor tag helper dove deve andare a navigare
             RouteValues["search"] = Input.Search;
-            RouteValues["orderby"] = OrderBy;
+            RouteValues["orderBy"] = OrderBy;
             RouteValues["ascending"] = (Input.OrderBy == OrderBy ? !Input.Ascending : Input.Ascending).ToString().ToLowerInvariant();
 
             //Faccio generare l'output html all'AnchorTagHelper

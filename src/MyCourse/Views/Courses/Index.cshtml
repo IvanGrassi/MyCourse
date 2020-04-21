@@ -26,8 +26,8 @@
     <div class="col-md-2"><a asp-route-orderby="CurrentPrice" asp-route-ascending="@(Model.Input.OrderBy == "CurrentPrice" ? !Model.Input.Ascending : true)" asp-route-search="@Model.Input.Search">Prezzo @if(Model.Input.OrderBy == "CurrentPrice") {<i class="fas fa-caret-@(Model.Input.Ascending ? "up" : "down")"></i> }</a></div>-->
 
     <div class="col-md-5"><order-link order-by="Title" Input="Model.Input">Titolo</order-link></div>
-    <div class="col-md-2"><order-link order-by="Title" Input="Model.Input">Valutazione</order-link></div>
-    <div class="col-md-2"><order-link order-by="Title" Input="Model.Input">Prezzo</order-link></div>
+    <div class="col-md-2"><order-link order-by="Rating" Input="Model.Input">Valutazione</order-link></div>
+    <div class="col-md-2"><order-link order-by="CurrentPrice" Input="Model.Input">Prezzo</order-link></div>
 
     <div class="col-md-2"></div>
 </div>

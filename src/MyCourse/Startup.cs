@@ -33,7 +33,7 @@ namespace MyCourse
         {
             services.AddResponseCaching(); //permette il ResponseCaching
 
-            services.AddControllersWithViews(options =>
+            services.AddMvc(options =>
             {
                 var homeProfile = new CacheProfile();
                 //homeProfile.Duration = Configuration.GetValue<int>("ResponseCache:Home:Duration");
@@ -43,7 +43,10 @@ namespace MyCourse
                 Configuration.Bind("ResponseCache:Home", homeProfile); //sezione da cui traggo i valori (appsettings.json) e l'istanza dell'oggetto che voglio popolare con i valori di configurazione partendo da home in giu
 
                 options.CacheProfiles.Add("Home", homeProfile);
+            
+            #if DEBUG
             }).AddRazorRuntimeCompilation();
+            #endif
 
             //services.AddTransient<ICourseService, AdoNetCourseServices> (); //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
             services.AddTransient<ICourseService, EfCoreCourseService>(); //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
@@ -110,11 +113,11 @@ namespace MyCourse
 
             app.UseStaticFiles(); //middleware file statici (immagini ad esempio)
 
-            app.UseRouting();
+            app.UseRouting();                   //EndopointRoutingMiddleware
 
-            app.UseResponseCaching(); //per il response caching
+            app.UseResponseCaching();           //per il response caching
 
-            app.UseEndpoints(endpoints =>
+            app.UseEndpoints(endpoints =>       //EndpointMiddleware
             {
                 //app.UseMvcWithDefaultRoute();
                 //configurato una route con il template controller, action e id. ora il middleware é in grado di estrapolare info dal percorso della richiesta utente

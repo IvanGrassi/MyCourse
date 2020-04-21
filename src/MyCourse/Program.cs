@@ -17,9 +17,12 @@ namespace MyCourse
             CreateWebHostBuilder(args).Build().Run();  //crea un oggetto in grado di costruire un web host
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+        //il web host é stato aggiornato a general host (.NET 3.0)
+        public static IHostBuilder CreateWebHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webHostBuilder =>{
+                    webHostBuilder.UseStartup<Startup>();
+                })
 
                 //Se volessi configurare la DI in un'applicazione console userei:
                 //.ConfigureServices

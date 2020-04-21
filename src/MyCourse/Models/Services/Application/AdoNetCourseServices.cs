@@ -34,10 +34,8 @@ namespace MyCourse.Models.Services.Application
 
             //la prima query carica il corso scelto al rispettivo id, la seconda invece carica tutte le lezioni legate all'id di quel corso
             //FormattableString separa la parte fissa dai suoi parametri
-            FormattableString query = $@"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency 
-            from Courses WHERE Id = {id}; 
-            SELECT Id, Title, Description, Duration 
-            FROM Lessons WHERE CourseID = {id}";
+            FormattableString query = $@"SELECT Id, Title, Description, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Id={id} 
+            ; SELECT Id, Title, Description, Duration FROM Lessons WHERE CourseID={id}";
 
             DataSet dataSet = await db.ExecuteQueryAsync(query);
 
@@ -69,7 +67,7 @@ namespace MyCourse.Models.Services.Application
             string direction = model.Ascending ? "ASC" : "DESC";  //se é true restituisce ASC, se é false: DESC
 
             //quali informazioni estrarre nei confronti di un database? eseguo una query
-            FormattableString query = $@"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql)orderBy} {(Sql)direction} LIMIT {model.Limit} OFFSET {model.Offset};
+            FormattableString query = $@"SELECT Id, Title, ImagePath, Author, Rating, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Title LIKE {"%" + model.Search + "%"} ORDER BY {(Sql) orderBy} {(Sql) direction} LIMIT {model.Limit} OFFSET {model.Offset};
             SELECT COUNT(*) FROM Courses WHERE Title LIKE {"%" + model.Search + "%"}";
             DataSet dataSet = await db.ExecuteQueryAsync(query);
             var dataTable = dataSet.Tables[0]; //primo datatable
