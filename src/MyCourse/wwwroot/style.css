@@ -1,3 +1,23 @@
+html,
+body {
+  min-height: 100vh; /*equivale al 100% del viewport(1vh = 1%)*/
+}
+
+body {
+  display: flex; /*elementi disposti l'uno dopo l'altro incolonnati*/
+  flex-direction: column;
+}
+
+body > .container {
+  flex: 1; /*si espande fino ad occupare tutto lo spazio disponibile*/
+}
+
+body > footer {
+  background-color: #f5f5f5;
+}
+
+/*proprietà generali*/
+
 h1 {
   margin-top: 0.7em;
   margin-bottom: 0.7em;
@@ -87,4 +107,29 @@ section + section {
 
 .jumbotron .lead {
   color: white;
+}
+
+/*gestione dei campi compilati incorrettamente*/
+
+/*asp-validation-for*/
+.field-validation-error {
+  color: red;
+}
+
+/*asp-validation-summary*/
+.validation-summary-errors ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1em;
+}
+
+.validation-summary-errors li {
+  color: darkred;
+  border-left: 3px solid red;
+  padding-left: 10px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  background-color: rgba(255, 0, 0, 0.05);
+  margin-bottom: 2px;
 }

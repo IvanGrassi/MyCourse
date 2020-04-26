@@ -134,5 +134,20 @@ namespace MyCourse.Models.Services.Application
             ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
             return result.Results;
         }
+
+        //-----------------------------------------Inserimento corsi----------------------------
+
+        public async Task<CourseDetailViewModel> CreateCourseAsync(CourseCreateInputModel inputModel)
+        {
+            string title = inputModel.Title;
+            string author = "Mario Verdi";
+            var course = new Course(title, author);      //nuova istanza di course 
+
+            dbContext.Add(course);                      //query di insert
+            await dbContext.SaveChangesAsync();               //persiste la modifica in modo definito
+        
+            //restituisco un istanza di CourseDetailVieModel tramite FromEntity
+            return CourseDetailViewModel.FromEntity(course);
+        }
     }
 }

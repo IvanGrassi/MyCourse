@@ -118,5 +118,24 @@ namespace MyCourse.Models.Services.Application
             ListViewModel<CourseViewModel> result = await GetCoursesAsync(inputModel);
             return result.Results;
         }
+
+        //--------------------------------Inserimento corso-----------------------------------------
+
+        public async Task<CourseDetailViewModel> CreateCourseAsync(CourseCreateInputModel inputModel)
+        {
+            //uso il servizio infrastrutturare per rivolgergli la query
+            string title = inputModel.Title;    //cio che l'utente inserisce
+            string author = "Mario Rossi";
+
+            //definisce alcuni valori predefiniti per evitare di inserire un campo vuoto
+            var dataSet = await db.ExecuteQueryAsync($@"INSERT INTO Courses (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, 'Courses/default.png', 'EUR', 0, 'EUR', 0);
+                                                    SELECT last_insert_rowid();");
+            
+            int courseId = Convert.ToInt32(dataSet.Tables[0].Rows[0][0]);
+
+            //fornisco l'id a una chiamata GetCourseAsync per ottenere tutto l'oggetto CourseDetailViewModel(Author, description, ecc...)
+            CourseDetailViewModel course = await GetCourseAsync(courseId); 
+            return course;
+        }
     }
 }

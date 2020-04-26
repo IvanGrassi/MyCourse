@@ -11,6 +11,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyCourse.Models.Enums;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Application;
 using MyCourse.Models.Services.Infrastructure;
@@ -48,9 +49,27 @@ namespace MyCourse
             }).AddRazorRuntimeCompilation();
             #endif
 
+            //Usiamo ADO.NET o Entity Framework Core per l'accesso ai dati?
+            var persistence = Persistence.EfCore;
+            switch (persistence)
+            {
+                case Persistence.AdoNet:
+                    services.AddTransient<ICourseService, AdoNetCourseServices>();
+                    services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>();
+                break;
+
+                case Persistence.EfCore:
+                    services.AddTransient<ICourseService, EfCoreCourseService>();
+                    services.AddDbContextPool<MyCourseDbContext>(optionsBuilder => {
+                        string connectionString = Configuration.GetSection("ConnectionStrings").GetValue<string>("Default");
+                        optionsBuilder.UseSqlite(connectionString);
+                });
+                break;
+            }
+
             //services.AddTransient<ICourseService, AdoNetCourseServices> (); //ogni volta che un componente ha una dipendenza da ICourseService, in realtà la sostituisce e coustruisce un AdoNetCourseServices
-            services.AddTransient<ICourseService, EfCoreCourseService>(); //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
-            services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>(); //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
+            //services.AddTransient<ICourseService, EfCoreCourseService>(); //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
+            //services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>(); //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
             services.AddTransient<ICachedCourseService, MemoryCacheCourseService>(); //ogni volta che un componente ha una dipendenza da ICachedCourseService, dotnetcore inietterà un istanza di MemoryCacheCourseService
 
             //services.AddScoped<MyCourseDbContext>();                                      //permette di avere al massimo un istanza per ogni richiesta HTTP

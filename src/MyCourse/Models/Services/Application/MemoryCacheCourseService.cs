@@ -70,5 +70,12 @@ namespace MyCourse.Models.Services.Application {
                 return courseService.GetMostRecentCoursesAsync ();
             });
         }
+
+        //-------------------------------------------Inserimento corsi------------------------------------
+        public Task<CourseDetailViewModel> CreateCourseAsync(CourseCreateInputModel inputModel)
+        {
+            //non viene eseguito il caching per le operazioni di scrittura
+            return courseService.CreateCourseAsync(inputModel);
+        }
     }
 }

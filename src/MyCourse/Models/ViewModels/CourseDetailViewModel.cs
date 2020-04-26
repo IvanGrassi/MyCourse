@@ -45,6 +45,8 @@ namespace MyCourse.Models.ViewModels
             return courseDetailViewModel;
         }
 
+
+        //permette di copiare tutti i valori trovati nell'entità course
         public static new CourseDetailViewModel FromEntity(Course course)   //metodi in cui passo l'istanza
         {
             return new CourseDetailViewModel

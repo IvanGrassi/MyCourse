@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MyCourse.Models.Enums;
 using MyCourse.Models.ValueTypes;
 
 namespace MyCourse.Models.Entities
@@ -19,9 +20,11 @@ namespace MyCourse.Models.Entities
 
             Title = title;      //questi due sono campi OBBLIGATORI
             Author = author;
-
             Lessons = new HashSet<Lesson>();
-        }
+            CurrentPrice = new Money(Currency.EUR, 0);  //valuta di default (se non viene aggiunta): EUR con prezzo 0
+            FullPrice = new Money(Currency.EUR, 0);
+            ImagePath = "/Courses/default.png";         //immagine di default (se non viene aggiunta)
+        }   
 
         //le proprietà sono private per evitare che dall'esterno si forniscano valori invalidi
         public int Id { get; private set; }    //PK

@@ -1,0 +1,22 @@
+@model CourseCreateInputModel
+<h1>@ViewData["Title"]</h1>
+<form method="post">
+    <div class="row">
+        <div class="col-12">
+            <!--asp-validation-summary mostra TUTTI gli errori di validazione che si sono verificati (anche più di uno alla volta)-->
+            <div asp-validation-summary="All"></div>
+        </div>
+    </div>    
+    <div class="row">
+        <div class="col-md-8">
+            <!--asp-form serve per legare la casella di testo alla proprietà Title presente nel CourseCreateInputModel-->
+            <input type="text" asp-for="Title" class="form-control form-control-lg" placeholder="Digita un titolo che attiri gli studenti...">
+            <!--visualizzazione dell'errore-->
+            <span asp-validation-for="Title"></span>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fas fas fa-rocket"></i>Crea corso!</button>
+        </div>
+    </div>
+</form>
+
