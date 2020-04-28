@@ -18,5 +18,6 @@ namespace MyCourse.Models.Services.Application
 
         //----------------------------Inserimento corso--------------------------
         Task<CourseDetailViewModel> CreateCourseAsync(CourseCreateInputModel inputModel);
+        Task<bool> IsTitleAvailableAsync(string title); //riceve un parametro di tipo stringa e restituisce un task di bool (true/false)
     }
 }

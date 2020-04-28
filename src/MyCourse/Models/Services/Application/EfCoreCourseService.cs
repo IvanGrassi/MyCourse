@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -141,13 +142,33 @@ namespace MyCourse.Models.Services.Application
         {
             string title = inputModel.Title;
             string author = "Mario Verdi";
-            var course = new Course(title, author);      //nuova istanza di course 
 
+            var course = new Course(title, author);      //nuova istanza di course 
             dbContext.Add(course);                      //query di insert
-            await dbContext.SaveChangesAsync();               //persiste la modifica in modo definito
-        
+            
+            try
+            {
+                await dbContext.SaveChangesAsync();               //persiste la modifica in modo definito
+            }
+            //delle eccezioni del db, catturo solamnte la sqlitexception con codice 19 (i corsi sono unique)
+            catch (DbUpdateException ex) when ((ex.InnerException as SqliteException)?.SqliteErrorCode == 19)
+            {
+                //eccezione personalizzata: creazione del corso fallita perché il titolo non era disponibile
+                throw new CourseTitleUnavailableException(title, ex);
+            }       
             //restituisco un istanza di CourseDetailVieModel tramite FromEntity
             return CourseDetailViewModel.FromEntity(course);
+        }
+
+        public async Task<bool> IsTitleAvailableAsync(string title)
+        {
+            //await dbContext.Courses.AnyAsyc(course => course.Title == title)
+            
+            //anyAsync restituisce true se esiste almeno una riga con il titolo digitato dall'utente
+            //EF.Functions.Like: costrutto che consente di essere esplicito sul tipo di funzione (like) che voglio usare per comporre la query
+            bool titleExists = await dbContext.Courses.AnyAsync(course =>EF.Functions.Like(course.Title, title));
+            //restituisco true SE il titolo é DISPONIBILE
+            return !titleExists;
         }
     }
 }

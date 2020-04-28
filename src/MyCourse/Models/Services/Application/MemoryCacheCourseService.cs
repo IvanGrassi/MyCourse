@@ -77,5 +77,11 @@ namespace MyCourse.Models.Services.Application {
             //non viene eseguito il caching per le operazioni di scrittura
             return courseService.CreateCourseAsync(inputModel);
         }
+
+        public Task<bool> IsTitleAvailableAsync(string title)
+        {
+            //invoco il servizio applicativo senza fare uso di caching
+            return courseService.IsTitleAvailableAsync(title);
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyCourse.Models.Exceptions;
@@ -127,6 +128,8 @@ namespace MyCourse.Models.Services.Application
             string title = inputModel.Title;    //cio che l'utente inserisce
             string author = "Mario Rossi";
 
+            
+            try{
             //definisce alcuni valori predefiniti per evitare di inserire un campo vuoto
             var dataSet = await db.ExecuteQueryAsync($@"INSERT INTO Courses (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, 'Courses/default.png', 'EUR', 0, 'EUR', 0);
                                                     SELECT last_insert_rowid();");
@@ -136,6 +139,24 @@ namespace MyCourse.Models.Services.Application
             //fornisco l'id a una chiamata GetCourseAsync per ottenere tutto l'oggetto CourseDetailViewModel(Author, description, ecc...)
             CourseDetailViewModel course = await GetCourseAsync(courseId); 
             return course;
+
+            //catturo solamnte la sqlitexception con codice 19 (i corsi sono unique)
+            } catch(SqliteException ex) when (ex.SqliteErrorCode == 19)
+            {
+                //eccezione personalizzata: creazione del corso fallita perché il titolo non era disponibile
+                throw new CourseTitleUnavailableException(title, ex);
+            }
+
+            
+        }
+
+        //verifica se il titolo é già in uso
+        public async Task<bool> IsTitleAvailableAsync(string title)
+        {
+            //invio una query che conteggia tutte le righe che contengono lo stesso input dell'utente (per evitare i doppioni)
+            DataSet result = await db.ExecuteQueryAsync($"SELECT COUNT(*) FROM Courses WHERE Title LIKE {title}");
+            bool titleAvailable = Convert.ToInt32(result.Tables[0].Rows[0][0]) == 0; //titolo disponibile (non duplicato) se il conteggio é 0
+            return titleAvailable;
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MyCourse.Models.Exceptions;
 using MyCourse.Models.InputModels;
 using MyCourse.Models.Services.Application;
 using MyCourse.Models.ViewModels;
@@ -58,15 +59,33 @@ namespace MyCourse.Controllers
         public async Task<IActionResult> Create(CourseCreateInputModel inputModel)
         {
             //verifica della validità dell'input (in base alle regole definite nel CourseCreateInputModel)
-            if(!ModelState.IsValid)
+            if(ModelState.IsValid)
             {
-                ViewData ["Title"] = "Nuovo corso";
-                //se la validazione non é corretta, restituisco di nuovo il form di inserimento
-                return View(inputModel); 
+                //titolo valido: creiamo il corso e se tutto va bene, reindirizziamo l'utente alla pagina di elenco
+                try
+                {
+                    CourseDetailViewModel course = await courseService.CreateCourseAsync(inputModel);  //passo il titolo (ricevuto nell'oggetto CourseCreateInputModel)
+                    //se la validazione non é corretta, restituisco di nuovo il form di inserimento
+                    return RedirectToAction(nameof(Index));             //dopo aver eseguito l'azione, viene indirizzato alla pagina Index
+                }
+                catch (CourseTitleUnavailableException)
+                {
+                    //se si verifica l'exception: aggiungiamo l'errore che riguarda la prop. Title e gli assegnamo il messaggio
+                    ModelState.AddModelError(nameof(CourseDetailViewModel.Title), "Questo titolo é già esistente e in uso");
+                }
+                
             }
+            ViewData["Title"] = "Nuovo corso";
+            return View(inputModel); 
+        }
 
-            CourseDetailViewModel course = await courseService.CreateCourseAsync(inputModel);  //passo il titolo (ricevito nell'oggetto CourseCreateInputModel)
-            return RedirectToAction(nameof(Index));             //dopo aver eseguito l'azione, viene indirizzato alla pagina Index
+        public async Task<IActionResult> IsTitleAvailable(string title)
+        {
+            //il parametro title contiene ciò che ha digitato l'utente e lo fornisco al metodo IsTitleAvailableAsync
+            bool result = await courseService.IsTitleAvailableAsync(title);
+            
+            //true se il titolo é disponibile (non esiste ancora nel db) altrimenti false
+            return Json(result);    //il ritorno json di un booleano é true o false
         }
     }
 }

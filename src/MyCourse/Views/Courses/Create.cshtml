@@ -9,7 +9,7 @@
     </div>    
     <div class="row">
         <div class="col-md-8">
-            <!--asp-form serve per legare la casella di testo alla proprietà Title presente nel CourseCreateInputModel-->
+            <!--asp-for serve per legare la casella di testo alla proprietà Title presente nel CourseCreateInputModel-->
             <input type="text" asp-for="Title" class="form-control form-control-lg" placeholder="Digita un titolo che attiri gli studenti...">
             <!--visualizzazione dell'errore-->
             <span asp-validation-for="Title"></span>
@@ -19,4 +19,9 @@
         </div>
     </div>
 </form>
+@section Scripts
+{
+    <!--qui utilizzo la partial _Validation.cshtml (validazione client) che verranno iniettati nella RenderSection-->
+    <partial name="_Validation"></partial>
+}
 
