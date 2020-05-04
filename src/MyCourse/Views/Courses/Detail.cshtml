@@ -2,15 +2,19 @@
 <section class="course-info">
     <div class="row">
         <div class="col-md-9">
-            <h1>@Model.Title</h1>
+            <!--Edit: nome dell'action che si occupa di fornire il form di modifica
+                asp-route-id: fornisce all'action edit, l'id che si vuole modificare-->
+        <h1>@Model.Title <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@Model.Id"><i class="fas fa-pencil-alt"></i> Modifica</a></h1>
         </div>
         <div class="col-md-3 d-flex align-items-end">
             <a href="#" class="btn btn-warning btn-lg btn-block subscribe-course">Iscriviti</a>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-9"><!--Occupa 9 delle 12 colonne-->
-        @Model.Description;
+        <div class="col-md-9" html-sanitize><!--Occupa 9 delle 12 colonne-->
+        <!--html raw serve per evitare problemi di lettura e di interpretazione dell'html-->
+        <!--<p>@Html.Raw(Model.Description)</p> HtmlSanitizeTagHelper prende il suo posto-->
+        @Model.Description
         </div>
         <div class="col-md-3">
             <aside>         <!--Aside prende la parte rimanente delle 12 colonne cioé 3-->

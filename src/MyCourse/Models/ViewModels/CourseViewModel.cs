@@ -16,7 +16,9 @@ namespace MyCourse.Models.ViewModels
         public Money FullPrice { get; set; }
         public Money CurrentPrice { get; set; }
 
-        public static CourseViewModel FromDataRow(DataRow courseRow) //fa il mapping di ogni datarow restituendo un oggetto di CourseViewModel o di CourseDetailViewModel
+        //per AdoNet
+        //permette di mappare tutti i valori trovati nel DataRow, all'interno di un istanza di CourseViewModel
+        public static CourseViewModel FromDataRow(DataRow courseRow)         
         {
             //qui genero un istanza di CourseViewModel, assegno ogni proprietà con i dati ottenuti dal DataRow
             var courseViewModel = new CourseViewModel
@@ -39,6 +41,8 @@ namespace MyCourse.Models.ViewModels
             return courseViewModel;
         }
 
+        //per EFCore
+        //permette di mappare tutti i valori trovati nell'entità course
         public static CourseViewModel FromEntity(Course course)
         {
             return new CourseViewModel

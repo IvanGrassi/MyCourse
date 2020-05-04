@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">    <!--View utilizzata per mettere tutto il codice di intestazione della pagina (header/footer)-->
+<html lang="en">    <!--View utilizzata per mettere TUTTO il codice di intestazione della pagina (header/footer) in TUTTE le view-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,6 +35,14 @@
         </nav>
     </header>
     <div class="container">     <!--RenderBody indicail punto in cui sarà incastonato l'output HTML prodotto dalla view di contenuto-->
+    @if(TempData["ConfirmationMessage"] != null)
+    {   
+        //verifica se la chiave ConfiramtionMessage esiste nel TempData (non é null)
+        //se esiste allora stampo la TempData stampando il messaggio
+        <div class="alert alert-success alert-dismissabale mt-3" role="alert">
+            @TempData["ConfirmationMessage"]
+        </div>
+    }
     @RenderBody()
     </div>
     

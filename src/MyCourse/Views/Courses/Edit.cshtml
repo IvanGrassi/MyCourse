@@ -1,0 +1,102 @@
+@model CourseEditInputModel     //fortemente tipizzata
+<section class="course-info">
+    <form method="post">
+        <div class="row">
+            <div class="col-md-9">
+                <h1>@ViewData["Title"]</h1>
+            </div>
+            <div class="col-md-3 d-flex align-items-center">
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Salva</button>
+                <button type="button" class="btn btn-danger btn-lg ml-3"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>
+
+        <!--Riga destinata alla visualizzazione degli errori di validazione-->
+        <div class="row">
+            <div class="col-12" asp-validation-summary="All"></div>
+        </div>
+        <!--id presente nel form ma non viene mostrato-->
+        <input type="hidden" asp-for="Id">
+
+        <!--Contiene le caselle dei form di modifica dei dati-->
+        <div class="row">
+            <div class="col-md-9">
+                <!--form group permette di "impilare" i form uno sotto l'altro-->
+                <div class="form-group">
+                    <!--type="text": permette testo su una sola riga-->
+                    <label asp-for="Title"></label>
+                    <input type="text" class="form-control form-control-lg" asp-for="Title">
+                    <span asp-validation-for="Title"></span> <!--visualizza gli errori di validazione specifici per la proprietà-->
+                </div>
+
+                <div class="form-group">
+                    <!--textarea permette l'immissione di testo su più righe
+                    rows invece genererà l'area grande (in px) quanto il numero di righe-->
+                    <label asp-for="Description"></label>
+                    <!--summernote qui-->
+                    <textarea asp-for="Description" class="form-control" data-summernote rows="18"></textarea>
+                    <span asp-validation-for="Description"></span>
+                </div>
+            </div>
+
+            <!--Colonna laterale-->
+            <div class="col-md-3">
+                <aside>
+                    <div class="form-group">
+                         <!--type="text": permette di inserire la email-->
+                        <label asp-for="Email"></label>
+                        <input type="email" asp-for="Email" class="form-control">
+                        <span asp-validation-for="Email"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="FullPrice"></label>
+                        <!--input group permette di tenere vicini vari tipi di casella differente (vedi moneta (EUR) con importo)-->
+                        <div class="input-group">
+                            <!--L'elemento select mi permette di ottenere un menu a tendina
+                             asp-items: server per ottenere gli elementi della lista (recupero l'enum Currency)-->
+                           
+                            <!--type="number": possono essere contenuti solo valori numerici
+                                step: permette di avere le frecce per incrementare/decrementare l'importo
+                                "any": indica l'incremento/decremento minimo che il valore dovrà avere-->
+                            <select asp-items="@Html.GetEnumSelectList<Currency>()" asp-for="FullPrice.Currency" class="form-control"></select>
+                            <input type="number" step="any" asp-for="FullPrice.Amount" class="form-control form-control-block">
+                            <span asp-validation-for="FullPrice"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CurrentPrice"></label>
+                        <div class="input-group">                            
+                            <select asp-items="@Html.GetEnumSelectList<Currency>()" asp-for="CurrentPrice.Currency" class="form-control"></select>
+                            <input type="number" step="any" asp-for="CurrentPrice.Amount" class="form-control form-control-block">
+                            <span asp-validation-for="CurrentPrice"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ImagePath"></label>
+                        <div class="preview-container">
+                            <input type="hidden" asp-for="ImagePath">
+                            <img id="preview" src="@Model.ImagePath" asp-append-version="true">
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </form>
+</section>
+@section Scripts
+{
+    <!--validazione lato client-->
+    <partial name="_Validation"></partial>
+    <partial name="_Summernote"></partial>
+
+    <script>
+        function updatePreview(inputFile) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#preview').attr('src', e.target.result);
+            };
+            reader.readAsDataURL(inputFile.files[0]);
+        }
+    </script>
+}

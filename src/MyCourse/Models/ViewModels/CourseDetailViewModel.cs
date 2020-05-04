@@ -20,6 +20,8 @@ namespace MyCourse.Models.ViewModels
             get => TimeSpan.FromSeconds(Lessons?.Sum(l => l.Duration.TotalSeconds) ?? 0);
         }
 
+        //per AdoNet
+        //permette di mappare tutti i valori trovati nel DataRow, all'interno di un istanza di CourseDetailViewModel
         public static new CourseDetailViewModel FromDataRow(DataRow courseRow)
         {
             var courseDetailViewModel = new CourseDetailViewModel
@@ -45,8 +47,8 @@ namespace MyCourse.Models.ViewModels
             return courseDetailViewModel;
         }
 
-
-        //permette di copiare tutti i valori trovati nell'entità course
+        //per EFCore
+        //permette di mappare tutti i valori trovati nell'entità course
         public static new CourseDetailViewModel FromEntity(Course course)   //metodi in cui passo l'istanza
         {
             return new CourseDetailViewModel

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MyCourse.Customization.ModelBinders;
 using MyCourse.Models.Enums;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Application;
@@ -39,15 +40,17 @@ namespace MyCourse
                 var homeProfile = new CacheProfile();
                 //homeProfile.Duration = Configuration.GetValue<int>("ResponseCache:Home:Duration");
                 //homeProfile.Location = Configuration.GetValue<ResponseCacheLocation>("ResponseCache:Home:Location");  //sia duration che location li recupero tramite appsettings.json
-
                 //homeProfile.VaryByQueryKeys = new string[]{"page"};       //la cache varia in base al valore della chiave "page", lo recupero dall'appsettings.json
                 Configuration.Bind("ResponseCache:Home", homeProfile); //sezione da cui traggo i valori (appsettings.json) e l'istanza dell'oggetto che voglio popolare con i valori di configurazione partendo da home in giu
-
                 options.CacheProfiles.Add("Home", homeProfile);
-            
+
+                options.ModelBinderProviders.Insert(0, new DecimalModelBinderProvider());   //registriamo il DecimalModelBinderProvider
+
+             }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
             #if DEBUG
-            }).AddRazorRuntimeCompilation();
+            .AddRazorRuntimeCompilation()
             #endif
+            ;
 
             //Usiamo ADO.NET o Entity Framework Core per l'accesso ai dati?
             var persistence = Persistence.AdoNet;
@@ -105,9 +108,10 @@ namespace MyCourse
             services.Configure<ConnectionStringsOptions>(Configuration.GetSection("ConnectionStrings")); //i valori vengono recuperati dal file appsettings.json, sezione ConnectionStrings
             services.Configure<CoursesOptions>(Configuration.GetSection("Courses")); //recupera le opzioni dalla classe dal file appsettings.json, sezione Courses
             services.Configure<MemoryCacheOptions>(Configuration.GetSection("MemoryCache")); //utilizza la classe preimpostata "MemoryCacheOptions", contiene i valori di configurazione per il caching, estraggo i valori da MemoryCache
-#if DEBUG
+
+            /*#if DEBUG
             services.AddLiveReload();
-#endif
+            #endif*/
 
         }
 
@@ -115,22 +119,35 @@ namespace MyCourse
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            /*#if DEBUG
+            app.UseLiveReload();
+            #endif*/
+
             //l'ambiente (production o development) viene definito nel launch.json
-            if (env.IsDevelopment()) //il middleware viene usato solo quando siamo in ambiente development
+            //if (env.IsDevelopment()) //il middleware viene usato solo quando siamo in ambiente development
+            if(env.IsEnvironment("Development"))
             {
                 app.UseDeveloperExceptionPage(); //primo middleware, SEMPRE per primo, produce una pagina informativa in caso di errore
             }
-
-#if DEBUG
-            app.UseLiveReload();
-#endif
-
-            if (env.IsStaging() || env.IsProduction()) //in tutti gli altri casi (es: Production)
+            else
             {
-                app.UseExceptionHandler("/Error"); //il parametro fornito (es: /Courses/Details/5000) verrà sostituito da /Error comprendendo le info dell'eccezione
+                app.UseExceptionHandler("/Error");
             }
 
+            /*if (env.IsStaging() || env.IsProduction()) //in tutti gli altri casi (es: Production)
+            {
+                app.UseExceptionHandler("/Error"); //il parametro fornito (es: /Courses/Details/5000) verrà sostituito da /Error comprendendo le info dell'eccezione
+            }*/
+
             app.UseStaticFiles(); //middleware file statici (immagini ad esempio)
+
+            //Nel caso volessi impostare una Culture specifica...
+            /*var appCulture = CultureInfo.InvariantCulture;
+            app.UseRequestLocalization(new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new RequestCulture(appCulture),
+                SupportedCultures = new[] { appCulture }
+            });*/
 
             app.UseRouting();                   //EndopointRoutingMiddleware
 

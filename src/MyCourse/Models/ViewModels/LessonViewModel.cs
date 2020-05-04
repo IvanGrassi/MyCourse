@@ -11,6 +11,8 @@ namespace MyCourse.Models.ViewModels
         public string Description { get; set; }
         public TimeSpan Duration { get; set; }
 
+        //per AdoNet
+        //permette di mappare tutti i valori trovati nel DataRow, all'interno di un istanza di LessonViewModel
         public static LessonViewModel FromDataRow(DataRow dataRow)
         {
             var lessonViewModel = new LessonViewModel
@@ -24,6 +26,8 @@ namespace MyCourse.Models.ViewModels
             return lessonViewModel;
         }
 
+        //per EFCore
+        //permette di mappare tutti i valori trovati nell'entità course
         public static LessonViewModel FromEntity(Lesson lesson)
         {
             return new LessonViewModel

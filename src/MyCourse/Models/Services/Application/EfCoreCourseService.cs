@@ -160,15 +160,69 @@ namespace MyCourse.Models.Services.Application
             return CourseDetailViewModel.FromEntity(course);
         }
 
-        public async Task<bool> IsTitleAvailableAsync(string title)
+    
+        //verifica se il titolo é già in uso e inoltre viene passato l'id assegnato al corso
+        public async Task<bool> IsTitleAvailableAsync(string title, int id)
         {
             //await dbContext.Courses.AnyAsyc(course => course.Title == title)
             
             //anyAsync restituisce true se esiste almeno una riga con il titolo digitato dall'utente
             //EF.Functions.Like: costrutto che consente di essere esplicito sul tipo di funzione (like) che voglio usare per comporre la query
-            bool titleExists = await dbContext.Courses.AnyAsync(course =>EF.Functions.Like(course.Title, title));
+            bool titleExists = await dbContext.Courses.AnyAsync(course => EF.Functions.Like(course.Title, title) && course.Id != id);
             //restituisco true SE il titolo é DISPONIBILE
             return !titleExists;
+        }
+
+        //-----------------------------------------Modifica corsi----------------------------
+
+        public async Task<CourseEditInputModel> GetCourseForEditingAsync(int id)
+        {
+             IQueryable<CourseEditInputModel> queryLinq = dbContext.Courses
+                .AsNoTracking()
+                .Where(course => course.Id == id)
+                .Select(course => CourseEditInputModel.FromEntity(course)); //Usando metodi statici come FromEntity, la query potrebbe essere inefficiente. Mantenere il mapping nella lambda oppure usare un extension method personalizzato
+
+            CourseEditInputModel viewModel = await queryLinq.FirstOrDefaultAsync();
+
+            if (viewModel == null)
+            {
+                logger.LogWarning("Course {id} not found", id);
+                throw new CourseNotFoundException(id);
+            }
+
+            return viewModel;
+        }
+
+        public async Task<CourseDetailViewModel> EditCourseAsync(CourseEditInputModel inputModel)
+        {
+            //Recupero dell'entità Course
+            //FindAsync: specializzato con le chiavi primarie, gli fornisco l'id
+            Course course = await dbContext.Courses.FindAsync(inputModel.Id);
+            
+            if (course == null)
+            {
+                throw new CourseNotFoundException(inputModel.Id);
+            }
+
+            //...e lui ci recupererà il corso (collegato a quell'id)
+            course.ChangeTitle(inputModel.Title);
+            course.ChangePrices(inputModel.FullPrice, inputModel.CurrentPrice);
+            course.ChangeDescription(inputModel.Description);
+            course.ChangeEmail(inputModel.Email);
+
+            //dbContext.Update(course); non necessario perché già l'entità course viene tracciata
+
+            try
+            {
+                //SaveChangesAsync invia un comando update al database
+                await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when ((ex.InnerException as SqliteException)?.SqliteErrorCode == 19)
+            {
+                throw new CourseTitleUnavailableException(inputModel.Title, ex);
+            }
+
+             return CourseDetailViewModel.FromEntity(course);
         }
     }
 }

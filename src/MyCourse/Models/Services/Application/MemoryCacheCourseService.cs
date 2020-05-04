@@ -16,8 +16,6 @@ namespace MyCourse.Models.Services.Application {
             this.memoryCache = memoryCache;
         }
 
-        //TODO: Ricordati di usare memoryCache.Remove($"Course{id}"); quando aggiorni il corso
-
         public Task<CourseDetailViewModel> GetCourseAsync (int id) {
             //con GetOrCreateAsync chiedo se esiste in cache un oggetto calcolato sull'id e lo recupero
             return memoryCache.GetOrCreateAsync ($"Course{id}", cacheEntry => {
@@ -40,8 +38,10 @@ namespace MyCourse.Models.Services.Application {
             bool canCache = model.Page <= 5 && string.IsNullOrEmpty (model.Search);
 
             //Se canCache è true, sfrutto il meccanismo di caching
-            if (canCache) {
-                return memoryCache.GetOrCreateAsync ($"Courses{model.Page}-{model.OrderBy}-{model.Ascending}", cacheEntry => {
+            if (canCache) 
+            {
+                return memoryCache.GetOrCreateAsync ($"Courses{model.Page}-{model.OrderBy}-{model.Ascending}", cacheEntry => 
+                {
                     cacheEntry.SetSize (1);
                     cacheEntry.SetAbsoluteExpiration (TimeSpan.FromSeconds (60));
                     return courseService.GetCoursesAsync (model);
@@ -78,10 +78,26 @@ namespace MyCourse.Models.Services.Application {
             return courseService.CreateCourseAsync(inputModel);
         }
 
-        public Task<bool> IsTitleAvailableAsync(string title)
+        public Task<bool> IsTitleAvailableAsync(string title, int id)
         {
             //invoco il servizio applicativo senza fare uso di caching
-            return courseService.IsTitleAvailableAsync(title);
+            return courseService.IsTitleAvailableAsync(title, id);
+        }
+
+        public Task<CourseEditInputModel> GetCourseForEditingAsync(int id)
+        {
+            //invoco il servizio applicativo senza fare uso di caching
+            return courseService.GetCourseForEditingAsync(id);
+        }
+
+         //-------------------------------------------Modifica corsi------------------------------------
+
+        public async Task<CourseDetailViewModel> EditCourseAsync(CourseEditInputModel inputModel)
+        {
+            CourseDetailViewModel viewModel = await courseService.EditCourseAsync(inputModel);
+            //invalidiamo la cache (vado a invalidare il dettalglio del corso)
+            memoryCache.Remove($"Course{inputModel.Id}");
+            return viewModel;
         }
     }
 }

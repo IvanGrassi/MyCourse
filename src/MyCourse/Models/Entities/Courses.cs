@@ -50,22 +50,52 @@ namespace MyCourse.Models.Entities
         }
 
         //metodo che permette il cambiamento di entrambi i prezzi (dove il fullprice DEVE essere > al discountprice)
-        public void ChangePrices(Money newFullPrice, Money newDiscountPrice)
+        public void ChangePrices(Money newFullPrice, Money newCurrentPrice)
         {
-            if (newFullPrice == null || newDiscountPrice == null)       //verifica che nessuno dei due valori sia nullo
+            if (newFullPrice == null || newCurrentPrice == null)       //verifica che nessuno dei due valori sia nullo
             {
                 throw new ArgumentException("Prices can't be null");
             }
-            if (newFullPrice.Currency != newDiscountPrice.Currency)     //verifica che sia la stessa valuta
+            if (newFullPrice.Currency != newCurrentPrice.Currency)     //verifica che sia la stessa valuta
             {
                 throw new ArgumentException("Currencies don't match");
             }
-            if (newFullPrice.Amount != newDiscountPrice.Amount)
+            if (newFullPrice.Amount < newCurrentPrice.Amount)
             {
                 throw new ArgumentException("Full price can't be less than the current price");
             }
             FullPrice = newFullPrice;
-            CurrentPrice = newDiscountPrice;
+            CurrentPrice = newCurrentPrice;
+        }
+
+        public void ChangeDescription(string newDescription)
+        {
+            if (newDescription != null)
+            {
+                if (newDescription.Length < 20)
+                {
+                    throw new Exception("Description is too short");
+                }
+                else if (newDescription.Length > 4000)
+                {
+                    throw new Exception("Description is too long");
+                }
+            }
+            Description = newDescription;
+        }
+
+        public void ChangeEmail(string newEmail)
+        {
+            if (string.IsNullOrEmpty(newEmail))
+            {
+                throw new ArgumentException("Email can't be empty");
+            }
+            Email = newEmail;
+        }
+
+        public void ChangeImagePath(string imagePath)
+        {
+            ImagePath = imagePath;
         }
 
         //Relazioni
