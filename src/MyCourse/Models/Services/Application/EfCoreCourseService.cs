@@ -18,13 +18,15 @@ namespace MyCourse.Models.Services.Application
     public class EfCoreCourseService : ICourseService
     {
         private readonly ILogger<EfCoreCourseService> logger;
+        private readonly IImagePersister imagePersister;
         private readonly MyCourseDbContext dbContext;
         private readonly IOptionsMonitor<CoursesOptions> coursesOptions;
 
-        public EfCoreCourseService(ILogger<EfCoreCourseService> logger, MyCourseDbContext dbContext, IOptionsMonitor<CoursesOptions> coursesOptions) //per esprimere la dipendenza del servizio applicativo dal servizio infrastutturale (MyCourseDbContext)
+        public EfCoreCourseService(ILogger<EfCoreCourseService> logger, IImagePersister imagePersister, MyCourseDbContext dbContext, IOptionsMonitor<CoursesOptions> coursesOptions) //per esprimere la dipendenza del servizio applicativo dal servizio infrastutturale (MyCourseDbContext)
         {
             this.coursesOptions = coursesOptions;
             this.logger = logger;
+            this.imagePersister = imagePersister;
             this.dbContext = dbContext;
         }
 
@@ -198,17 +200,31 @@ namespace MyCourse.Models.Services.Application
             //Recupero dell'entità Course
             //FindAsync: specializzato con le chiavi primarie, gli fornisco l'id
             Course course = await dbContext.Courses.FindAsync(inputModel.Id);
-            
+
             if (course == null)
             {
                 throw new CourseNotFoundException(inputModel.Id);
             }
 
-            //...e lui ci recupererà il corso (collegato a quell'id)
+            //...e lui ci recupererà il corso (collegato a quell'id) andando a richiamare i metodi presenti in Courses
             course.ChangeTitle(inputModel.Title);
             course.ChangePrices(inputModel.FullPrice, inputModel.CurrentPrice);
             course.ChangeDescription(inputModel.Description);
             course.ChangeEmail(inputModel.Email);
+
+            if (inputModel.Image != null)
+            {
+                try{
+                    string imagePath = await imagePersister.SaveCourseImageAsync(inputModel.Id, inputModel.Image);
+                    //aggiorno solo l'image path con il nuovo percorso che é stato restituito
+                    course.ChangeImagePath(imagePath);
+                }
+                catch(Exception ex) //immagine troppo grande!
+                {
+                    throw new CourseImageInvalidException(inputModel.Id, ex);
+                }
+                
+            }
 
             //dbContext.Update(course); non necessario perché già l'entità course viene tracciata
 

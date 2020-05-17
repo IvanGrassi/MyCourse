@@ -24,7 +24,8 @@ namespace MyCourse.Customization.TagHelpers
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             //l'attributo type é impostato su number, escludo tutti gli altri tipi di casella (text, email, ...)
-           bool isNumberInputType = output.Attributes.Any(attribute => "type".Equals(attribute.Name, StringComparison.InvariantCultureIgnoreCase) && "number".Equals(attribute.Value as string, StringComparison.InvariantCultureIgnoreCase));
+           bool isNumberInputType = output.Attributes.Any(attribute => "type".Equals(attribute.Name, StringComparison.InvariantCultureIgnoreCase) 
+           && "number".Equals(attribute.Value as string, StringComparison.InvariantCultureIgnoreCase));
             if (!isNumberInputType)
             {
                 return;                 //non é di tipo number: esco

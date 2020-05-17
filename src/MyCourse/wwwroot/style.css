@@ -163,11 +163,11 @@ section + section {
 }
 
 .preview-container img {
-  position: absolute;
+  position: absolute; /*si posiziona in alto a sinistra*/
   top: 0;
   left: 0;
-  width: 100%;
+  width: 100%; /*l'immagine occupa tutta la superficie a sua disposizione*/
   height: 100%;
-  object-fit: cover;
-  object-position: top left;
+  object-fit: cover; /*l'immagine dovrà occupare tutta la sua superficie ma SENZA che siano alterate le sue proporzioni*/
+  object-position: top left; /*mostriamo solo l'angono in alto a sinistra*/
 }

@@ -112,10 +112,11 @@ namespace MyCourse.Controllers
                 //titolo valido: creiamo il corso e se tutto va bene, reindirizziamo l'utente alla pagina di elenco
                 try
                 {
+                    //qui inoltre salviamo l'immagine sul disco
                     CourseDetailViewModel course = await courseService.EditCourseAsync(inputModel);  //passo il titolo (ricevuto nell'oggetto CourseCreateInputModel)
                     //imposto il messaggio di conferma
                     TempData["ConfirmationMessage"] = "I dati sono stati salvati con successo";
-                    //redireziono alla pagina di dettaglio, creo un oggetto con proprietà id valorizzata con l'id del corso
+                    //redireziono alla pagina di dettaglio, creo un oggetto anonimo con proprietà id valorizzata con l'id del corso
                     return RedirectToAction(nameof(Detail), new {id = inputModel.Id});             //dopo aver eseguito l'azione, viene indirizzato alla pagina Index
                 }
                 catch (CourseTitleUnavailableException)

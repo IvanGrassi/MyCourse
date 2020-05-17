@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -53,7 +54,7 @@ namespace MyCourse
             ;
 
             //Usiamo ADO.NET o Entity Framework Core per l'accesso ai dati?
-            var persistence = Persistence.AdoNet;
+            var persistence = Persistence.EfCore;
             switch (persistence)
             {
                 case Persistence.AdoNet:
@@ -74,16 +75,19 @@ namespace MyCourse
             //services.AddTransient<ICourseService, EfCoreCourseService>(); //ogni volta che un componente ha una dipendenza da ICourseService, verrà fornita un istanza di EfCoreCourseService
             //services.AddTransient<IDatabaseAccess, SqlLiteDatabaseAccess>(); //ogni volta che un componente ha una dipendenza da IDatabaseAccess, dotnetcore inietterà un istanza di SqlLiteDatabaseAccess
             services.AddTransient<ICachedCourseService, MemoryCacheCourseService>(); //ogni volta che un componente ha una dipendenza da ICachedCourseService, dotnetcore inietterà un istanza di MemoryCacheCourseService
+            services.AddSingleton<IImagePersister, MagickNetImagePersister>();      //unica istanza del MagickNeT che verrà riutilizzata se necessario
 
             //services.AddScoped<MyCourseDbContext>();                                      //permette di avere al massimo un istanza per ogni richiesta HTTP
             //services.AddDbContext<MyCourseDbContext>();                                   //permette di fare in modo che ogni query eseguita, viene messo in un file di log il comando sql
 
-            services.AddDbContextPool<MyCourseDbContext>(optionsBuilder =>
+            //services.AddTransient<IImagePersister, InsecureImagePersister>();
+
+            /*services.AddDbContextPool<MyCourseDbContext>(optionsBuilder =>
             {
                 //recupera dalla sezione "ConnectionStrings" di appsettings.json da cui recupero "Default" (che é una stringa)
                 string connectionString = Configuration.GetSection("ConnectionStrings").GetValue<string>("Default");
                 optionsBuilder.UseSqlite(connectionString);
-            });
+            });*/
 
             #region Configurazione del servizio di cache distribuita
 
@@ -108,6 +112,7 @@ namespace MyCourse
             services.Configure<ConnectionStringsOptions>(Configuration.GetSection("ConnectionStrings")); //i valori vengono recuperati dal file appsettings.json, sezione ConnectionStrings
             services.Configure<CoursesOptions>(Configuration.GetSection("Courses")); //recupera le opzioni dalla classe dal file appsettings.json, sezione Courses
             services.Configure<MemoryCacheOptions>(Configuration.GetSection("MemoryCache")); //utilizza la classe preimpostata "MemoryCacheOptions", contiene i valori di configurazione per il caching, estraggo i valori da MemoryCache
+            services.Configure<KestrelServerOptions>(Configuration.GetSection("Kestrel"));
 
             /*#if DEBUG
             services.AddLiveReload();

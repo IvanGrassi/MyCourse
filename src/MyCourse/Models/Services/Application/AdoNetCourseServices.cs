@@ -20,9 +20,11 @@ namespace MyCourse.Models.Services.Application
         private readonly ILogger<AdoNetCourseServices> logger;
         private readonly IDatabaseAccess db;
         private readonly IOptionsMonitor<CoursesOptions> coursesOptions;
+        private readonly IImagePersister imagePersister;
 
-        public AdoNetCourseServices(ILogger<AdoNetCourseServices> logger, IDatabaseAccess db, IOptionsMonitor<CoursesOptions> coursesOptions) //dipende dai due servizi infrastrutturali
+        public AdoNetCourseServices(ILogger<AdoNetCourseServices> logger, IDatabaseAccess db, IImagePersister imagePersister, IOptionsMonitor<CoursesOptions> coursesOptions)
         {
+            this.imagePersister = imagePersister;
             this.coursesOptions = coursesOptions;
             this.logger = logger;
             this.db = db;
@@ -184,17 +186,17 @@ namespace MyCourse.Models.Services.Application
 
         public async Task<CourseDetailViewModel> EditCourseAsync(CourseEditInputModel inputModel)
         {
+            //verifica quante righe esistono con quell'id
+            //se ritorna 0: non c'é alcun corso corrispondente al criterio
             DataSet dataSet = await db.ExecuteQueryAsync($"SELECT COUNT(*) FROM Courses WHERE Id={inputModel.Id}");
             if (Convert.ToInt32(dataSet.Tables[0].Rows[0][0]) == 0)
             {
-                throw new CourseNotFoundException(inputModel.Id);
+                throw new CourseNotFoundException(inputModel.Id);   //e sollevo un eccezione impedendo lo svolgimento delle funzioni a seguire
             }
 
             try
             {
                 dataSet = await db.ExecuteQueryAsync($"UPDATE Courses SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}");
-                CourseDetailViewModel course = await GetCourseAsync(inputModel.Id);     //restituisco l'istanza di CourseDetailViewModel DOPO l'aggionrnamento dei dati
-                return course;
             }
             //catturo solamente la sqlitexception con codice 19 (i corsi sono unique)
             catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
@@ -202,6 +204,23 @@ namespace MyCourse.Models.Services.Application
                 //eccezione personalizzata: creazione del corso fallita perché il titolo é già in utilizzo da un altro corso
                 throw new CourseTitleUnavailableException(inputModel.Title, ex);
             }
+
+            if (inputModel.Image != null)
+            {
+                try{
+                    string imagePath = await imagePersister.SaveCourseImageAsync(inputModel.Id, inputModel.Image);
+                    //aggiorno solo l'image path con il nuovo percorso che é stato restituito
+                    dataSet = await db.ExecuteQueryAsync($"UPDATE Courses SET ImagePath={imagePath} WHERE Id={inputModel.Id}");
+                }
+                catch(Exception ex) //immagine troppo grande!
+                {
+                    throw new CourseImageInvalidException(inputModel.Id, ex);
+                }
+                
+            }
+
+            CourseDetailViewModel course = await GetCourseAsync(inputModel.Id);
+            return course;
         }
     }
 }

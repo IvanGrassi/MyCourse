@@ -9,7 +9,7 @@ namespace MyCourse.Customization.TagHelpers
     [HtmlTargetElement(Attributes = "html-sanitize")]   //viene richiamato ogni volta che si usa l'attributo html-sanitize
     public class HtmlSanitizeTagHelper : TagHelper
     {
-        //la pagina server per evitare il cross site scripting (iniettare del codice javascript dall'ispeziona pagina)
+        //la pagina serve per evitare il cross site scripting (iniettare del codice javascript dall'ispeziona pagina)
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MyCourse.Controllers;
 using MyCourse.Models.Entities;
@@ -24,10 +25,9 @@ namespace MyCourse.Models.InputModels
          RegularExpression(@"^[\w\s\.']+$", ErrorMessage = "Titolo non valido"),
          Remote(action: nameof(CoursesController.IsTitleAvailable), controller: "Courses", ErrorMessage = "Il titolo esiste già", AdditionalFields = "Id"),
          Display(Name = "Titolo")]
-         //Display indica l'etichetta (spiega l'utilizzo della casella, é posta sopra il form)
-        
-        
+         //Display indica l'etichetta (spiega l'utilizzo della casella, é posta sopra il form)       
         public string Title { get; set; }
+        
         
         [MinLength(10, ErrorMessage = "La descrizione dev'essere di almeno {1} caratteri"),
          MaxLength(4000, ErrorMessage = "La descrizione dev'essere di massimo {1} caratteri"),
@@ -55,8 +55,8 @@ namespace MyCourse.Models.InputModels
         public Money CurrentPrice { get; set; }
 
 
-
-        
+        [Display(Name = "Nuova immagine...")]
+        public IFormFile Image { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
