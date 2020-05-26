@@ -26,6 +26,9 @@ namespace MyCourse.Models.Services.Infrastructure
                 entity.HasKey(course => course.Id);    //indica la PK, superfluo se la proprietà si chiama Id oppure CorsesId
                 //entity.HasKey(course => new object{ course.Id, course.Author}) //SE abbiamo piu di una PK in tabella
 
+                //concorrenza ottimistica
+                entity.Property(course => course.RowVersion).IsRowVersion();
+
                 //--------------Mapping per gli owned types
 
                 //Current Price

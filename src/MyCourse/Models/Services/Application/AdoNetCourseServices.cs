@@ -7,6 +7,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyCourse.Models.Exceptions;
+using MyCourse.Models.Exceptions.Application;
+using MyCourse.Models.Exceptions.Infrastructure;
 using MyCourse.Models.InputModels;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
@@ -133,10 +135,10 @@ namespace MyCourse.Models.Services.Application
             
             try{
             //definisce alcuni valori predefiniti per evitare di inserire un campo vuoto
-            var dataSet = await db.ExecuteQueryAsync($@"INSERT INTO Courses (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, 'Courses/default.png', 'EUR', 0, 'EUR', 0);
+            int courseId = await db.ExecuteQueryScalarAsync<int>($@"INSERT INTO Courses (Title, Author, ImagePath, CurrentPrice_Currency, CurrentPrice_Amount, FullPrice_Currency, FullPrice_Amount) VALUES ({title}, {author}, 'Courses/default.png', 'EUR', 0, 'EUR', 0);
                                                     SELECT last_insert_rowid();");
             
-            int courseId = Convert.ToInt32(dataSet.Tables[0].Rows[0][0]);
+            //int courseId = Convert.ToInt32(dataSet.Tables[0].Rows[0][0]); //entra nella prima tabella e di tutte le sue righe e colonne siamo entrati nella prima (il risultato da una sola riga come risultato)
 
             //fornisco l'id a una chiamata GetCourseAsync per ottenere tutto l'oggetto CourseDetailViewModel(Author, description, ecc...)
             CourseDetailViewModel course = await GetCourseAsync(courseId); 
@@ -158,9 +160,9 @@ namespace MyCourse.Models.Services.Application
             //invio una query che conteggia tutte le righe che contengono lo stesso input dell'utente (per evitare i doppioni)
             //l'id dovrà essere diverso da quello fornito dall'esterno (verifico i restanti corsi ma non quello che sto modificando attualmente)
 
-            DataSet result = await db.ExecuteQueryAsync($"SELECT COUNT(*) FROM Courses WHERE Title LIKE {title} AND id<>{id}");
-            bool titleAvailable = Convert.ToInt32(result.Tables[0].Rows[0][0]) == 0; //titolo disponibile (non duplicato) se il conteggio é 0
-            return titleAvailable;
+            bool titleExists = await db.ExecuteQueryScalarAsync<bool>($"SELECT COUNT(*) FROM Courses WHERE Title LIKE {title} AND id<>{id}");
+            //bool titleAvailable = Convert.ToInt32(result.Tables[0].Rows[0][0]) == 0; //titolo disponibile (non duplicato) se il conteggio é 0
+            return !titleExists;
         }
 
         //--------------------------------Modifica corso-----------------------------------------
@@ -168,7 +170,7 @@ namespace MyCourse.Models.Services.Application
         public async Task<CourseEditInputModel> GetCourseForEditingAsync(int id)
         {
             //seleziona tutti i campi modificabili
-            FormattableString query = $@"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency FROM Courses WHERE Id={id}";
+            FormattableString query = $@"SELECT Id, Title, Description, ImagePath, Email, FullPrice_Amount, FullPrice_Currency, CurrentPrice_Amount, CurrentPrice_Currency, RowVersion FROM Courses WHERE Id={id}";
 
             DataSet dataSet = await db.ExecuteQueryAsync(query);
 
@@ -188,24 +190,50 @@ namespace MyCourse.Models.Services.Application
         {
             //verifica quante righe esistono con quell'id
             //se ritorna 0: non c'é alcun corso corrispondente al criterio
-            DataSet dataSet = await db.ExecuteQueryAsync($"SELECT COUNT(*) FROM Courses WHERE Id={inputModel.Id}");
-            if (Convert.ToInt32(dataSet.Tables[0].Rows[0][0]) == 0)
+            /*bool courseExists = await db.ExecuteQueryScalarAsync<bool>($"SELECT COUNT(*) FROM Courses WHERE Id={inputModel.Id}");
+            if (!courseExists)
             {
                 throw new CourseNotFoundException(inputModel.Id);   //e sollevo un eccezione impedendo lo svolgimento delle funzioni a seguire
-            }
+            }*/
 
             try
             {
-                dataSet = await db.ExecuteQueryAsync($"UPDATE Courses SET Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice.Currency}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice.Currency}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id}");
+                string imagePath = null;
+                if(inputModel.Image != null)
+                {
+                    imagePath = await imagePersister.SaveCourseImageAsync(inputModel.Id, inputModel.Image);
+                }
+                //COALESCE: può accettare un qualsiasi numero di argomenti e restituisce il primo che trova NON NULL
+                //se image path é null (nessuna img fornita), restituisce il valore stesso del campo imagePath (riassegnato su se stesso)
+
+                int affectedRows = await db.CommandAsync($"UPDATE Courses SET ImagePath=COALESCE({imagePath}, ImagePath), Title={inputModel.Title}, Description={inputModel.Description}, Email={inputModel.Email}, CurrentPrice_Currency={inputModel.CurrentPrice.Currency.ToString()}, CurrentPrice_Amount={inputModel.CurrentPrice.Amount}, FullPrice_Currency={inputModel.FullPrice.Currency.ToString()}, FullPrice_Amount={inputModel.FullPrice.Amount} WHERE Id={inputModel.Id} AND RowVersion={inputModel.RowVersion}");
+                if(affectedRows == 0)  //se il numero di righe interessate é 0
+                {  
+                    //verifichiamo se il corso esiste
+                    bool courseExists = await db.ExecuteQueryScalarAsync<bool>($"SELECT COUNT(*) FROM Courses WHERE Id={inputModel.Id}");   //count = 1: corso esistente, count = 0: corso non esiste
+                    if(courseExists)    //se il corso esiste
+                    {
+                        //allora é fallito il controllo sulla rowVersion (concorrenza ottimistica)
+                        throw new OptimisticConcurrencyException();
+                    }
+                    else //se il corso non dovesse esistere
+                    {
+                        throw new CourseNotFoundException(inputModel.Id);
+                    }
+                    
+                }
             }
-            //catturo solamente la sqlitexception con codice 19 (i corsi sono unique)
-            catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+            catch (ConstraintViolationException ex)
             {
                 //eccezione personalizzata: creazione del corso fallita perché il titolo é già in utilizzo da un altro corso
                 throw new CourseTitleUnavailableException(inputModel.Title, ex);
             }
+            catch(ImagePersistenceException ex) //immagine troppo grande!
+            {
+                throw new CourseImageInvalidException(inputModel.Id, ex);
+            }
 
-            if (inputModel.Image != null)
+            /*if (inputModel.Image != null)
             {
                 try{
                     string imagePath = await imagePersister.SaveCourseImageAsync(inputModel.Id, inputModel.Image);
@@ -217,7 +245,7 @@ namespace MyCourse.Models.Services.Application
                     throw new CourseImageInvalidException(inputModel.Id, ex);
                 }
                 
-            }
+            }*/
 
             CourseDetailViewModel course = await GetCourseAsync(inputModel.Id);
             return course;

@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyCourse.Models.Exceptions.Infrastructure;
 using MyCourse.Models.Options;
 using MyCourse.Models.ValueTypes;
 
@@ -22,50 +23,87 @@ namespace MyCourse.Models.Services.Infrastructure
             this.connectionStringsOptions = connectionStringsOptions;       //Conservo il riferimento al servizio su un campo privato...
         }
 
+        public async Task<int> CommandAsync(FormattableString formattableCommand)
+        {
+            try
+            {
+            using SqliteConnection conn = await GetOpenedConnection();
+            using SqliteCommand cmd = GetCommand(formattableCommand, conn);
+            int affectedRows = await cmd.ExecuteNonQueryAsync();
+            return affectedRows;
+            }
+            catch (SqliteException ex) when (ex.SqliteErrorCode == 19)
+            {
+                throw new ConstraintViolationException(ex);
+            }
+
+        }
+
+        public async Task<T> ExecuteQueryScalarAsync<T>(FormattableString formattableQuery)
+        {
+            using SqliteConnection conn = await GetOpenedConnection();
+            using SqliteCommand cmd = GetCommand(formattableQuery, conn);
+            object result = await cmd.ExecuteScalarAsync();
+            return (T)Convert.ChangeType(result, typeof(T));        //change type permette di fornire un argomento di tipo object (result) e indicare il tipo verso il quale convertirlo
+        }
+
         //implementazione completa del servizio infrastrutturale (IDatabaseAccess)
         public async Task<DataSet> ExecuteQueryAsync(FormattableString formattableQuery)       //oggetto in grado di conservare in memoria una o piu tabelle di risultati che arrivano da un db relazionale
         {
             logger.LogInformation(formattableQuery.Format, formattableQuery.GetArguments());
 
-            var queryArguments = formattableQuery.GetArguments();             //otteniamo gli argomenti della query (l'id che viene usato sia per la tabella dei Courses che delle Lessons)
-            var sqlLiteParameters = new List<SqliteParameter>();              //creiamo una lista di parametri (Sqliteparameters)
-            for (var i = 0; i < queryArguments.Length; i++)                   //cicla tutti gli argomenti (i due id)
+            using SqliteConnection conn = await GetOpenedConnection();
+            using SqliteCommand cmd = GetCommand(formattableQuery, conn);
+
+            //Inviamo la query al database e otteniamo un SqLiteDataReader
+            //per leggere i risultati
+
+             using var reader = await cmd.ExecuteReaderAsync();
+
+             var dataSet = new DataSet();                        //invio dei dati dal db strutturali al servizio applicativo 
+             //dataSet.EnforceConstraints = false;                 //Fix per evitare un bug del provider Microsoft.Data.Sqlite
+
+             //creaiamo un datatable per ogni table che abbiamo finché il reader non si chiude
+             do
+             {
+                 var dataTable = new DataTable();
+                 dataSet.Tables.Add(dataTable);
+                 dataTable.Load(reader);                 //il datatable legge i dati trovati dal reader che esegue la query
+             } while (!reader.IsClosed);
+             return dataSet;
+        }
+
+        private static SqliteCommand GetCommand(FormattableString formattableQuery, SqliteConnection conn)
+        {
+            //Creiamo dei SqliteParameter a partire dalla FormattableString
+            var queryArguments = formattableQuery.GetArguments();
+            var sqliteParameters = new List<SqliteParameter>();
+            for (var i = 0; i < queryArguments.Length; i++)
             {
                 if (queryArguments[i] is Sql)
-                {   //se l'argomento é di tipo sql, non creare il sqlLiteParameter
+                {
                     continue;
                 }
-                var parameter = new SqliteParameter(i.ToString(), queryArguments[i]);
-                sqlLiteParameters.Add(parameter);
-                queryArguments[i] = "@" + i;                                  //il param. viene aggiunto alla lista e davanti a ogni param. viene aggiunta la @ (quindi diventa id = @id. ad es: id = @5)
+                //se il valore é null, restituisco null tramite operatore ??
+                var parameter = new SqliteParameter(name: i.ToString(), value: queryArguments[i] ?? DBNull.Value); 
+                sqliteParameters.Add(parameter);
+                queryArguments[i] = "@" + i;
             }
             string query = formattableQuery.ToString();
 
+            var cmd = new SqliteCommand(query, conn);
+            //Aggiungiamo i SqliteParameters al SqliteCommand
+            cmd.Parameters.AddRange(sqliteParameters);
+            return cmd;
+        }
 
+        private async Task<SqliteConnection> GetOpenedConnection()
+        {
             //Colleghiamoci al db Sqlite, inviamo la query e leggiamo i risultati
-            string connectionString = connectionStringsOptions.CurrentValue.Default;    //NON dobbiamo più scrivere la stringa, ma usiamo Default
-            using (var conn = new SqliteConnection(connectionString))
-            {
-                await conn.OpenAsync();
-                using (var cmd = new SqliteCommand(query, conn))
-                {    //invio query al db
-                    cmd.Parameters.AddRange(sqlLiteParameters);              //Aggiungiamo tutti i parametri passati qui sopra
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        var dataSet = new DataSet();                        //invio dei dati dal db strutturali al servizio applicativo 
-                        dataSet.EnforceConstraints = false;                 //Fix per evitare un bug del provider Microsoft.Data.Sqlite
-
-                        //creaiamo un datatable per ogni table che abbiamo finché il reader non si chiude
-                        do
-                        {
-                            var dataTable = new DataTable();
-                            dataSet.Tables.Add(dataTable);
-                            dataTable.Load(reader);                 //il datatable legge i dati trovati dal reader che esegue la query
-                        } while (!reader.IsClosed);
-                        return dataSet;
-                    }
-                }
-            }
+            //NON dobbiamo più scrivere la stringa, ma usiamo Default
+            var conn = new SqliteConnection(connectionStringsOptions.CurrentValue.Default);
+            await conn.OpenAsync();
+            return conn;
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MyCourse.Models.Entities;
 using MyCourse.Models.Exceptions;
+using MyCourse.Models.Exceptions.Application;
 using MyCourse.Models.InputModels;
 using MyCourse.Models.Options;
 using MyCourse.Models.Services.Infrastructure;
@@ -212,6 +213,11 @@ namespace MyCourse.Models.Services.Application
             course.ChangeDescription(inputModel.Description);
             course.ChangeEmail(inputModel.Email);
 
+            //concorrenza ottimistica (prima di invocare il SaveAsync)
+            //chiediamo il registro dell'entità (Entry(course) e la sua proprietà RowVersion a cui settiamo l'original value)
+            //il valore fornito dall'input model é letto dal db
+            dbContext.Entry(course).Property(course => course.RowVersion).OriginalValue = inputModel.RowVersion;
+
             if (inputModel.Image != null)
             {
                 try{
@@ -232,6 +238,10 @@ namespace MyCourse.Models.Services.Application
             {
                 //SaveChangesAsync invia un comando update al database
                 await dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException) 
+            {
+                throw new OptimisticConcurrencyException();
             }
             catch (DbUpdateException ex) when ((ex.InnerException as SqliteException)?.SqliteErrorCode == 19)
             {

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyCourse.Models.Exceptions;
+using MyCourse.Models.Exceptions.Application;
 using MyCourse.Models.InputModels;
 using MyCourse.Models.Services.Application;
 using MyCourse.Models.ViewModels;
@@ -119,10 +120,18 @@ namespace MyCourse.Controllers
                     //redireziono alla pagina di dettaglio, creo un oggetto anonimo con proprietà id valorizzata con l'id del corso
                     return RedirectToAction(nameof(Detail), new {id = inputModel.Id});             //dopo aver eseguito l'azione, viene indirizzato alla pagina Index
                 }
+                catch (CourseImageInvalidException)
+                {
+                    ModelState.AddModelError(nameof(CourseEditInputModel.Image), "L'immagine selezionata non è valida");
+                } 
                 catch (CourseTitleUnavailableException)
                 {
                     //se si verifica l'exception: aggiungiamo l'errore al ModelState e la segnaliamo al docente
                     ModelState.AddModelError(nameof(CourseEditInputModel.Title), "Questo titolo é già esistente e in uso");
+                }
+                catch (OptimisticConcurrencyException)
+                {
+                    ModelState.AddModelError("", "Spiacenti, il salvataggio non è andato a buon fine perché nel frattempo un altro utente ha aggiornato il corso. Ti preghiamo di aggiornare la pagina e ripetere le modifiche.");
                 }
             }
 
