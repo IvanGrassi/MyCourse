@@ -1,25 +1,22 @@
 <!--Rappresenta una riga all'interno di un elenco dei corsi-->
 @model CourseViewModel
 
-<hr>
-<div class="row course">
-   <div class="col-md-1"> 
-       <img src="@Model.ImagePath" width="52" height="52" asp-append-version="true">    
-   </div>
-   <div class="col-md-5">  
-       <h2>@Model.Title</h2>  
-       <author>@Model.Author</author>
-   </div>
-   <div class="col-md-2 rating" title="@Model.Rating">  
-               
-   <rating value="@Model.Rating"></rating>
-   
-   </div>
-   <div class="col-md-2 price">
-       
-       <price current-price="@Model.CurrentPrice" full-price="@Model.FullPrice"></price>
-   </div>
-   <div class="col-md-2 d-flex align-items-center">
-       <a class="btn btn-outline-primary" asp-controller="Courses" asp-action="Detail" asp-route-id="@Model.Id">Dettaglio</a>   
-   </div>
-</div>
+
+
+  <div class="col-12 col-sm-8 col-md-6 col-lg-4 cards-align">
+    <div class="card card-dimensions">
+      <img class="card-img" src="@Model.ImagePath">
+      <div class="card-body">
+        <h4 class="card-title">@Model.Title</h4>
+        <h6 class="card-subtitle sub-author">Di @Model.Author</h6>
+      <div class="card-subtitle rating " title="@Model.Rating">  
+        <rating value="@Model.Rating"></rating> 
+      </div>
+      <div class="buy d-flex justify-content-between align-items-center">
+        <div class="price text-success"><h5 class="mt-4">@Model.CurrentPrice</h5></div>
+        <div class="price text-danger oldPrice"><h5 class="mt-4">@Model.FullPrice</h5></div>
+      </div>
+        <a class="btn btn-outline-primary mt-1 detailBtn" asp-controller="Courses" asp-action="Detail" asp-route-id="@Model.Id">Dettaglio</a>
+      </div>
+    </div>
+  </div>

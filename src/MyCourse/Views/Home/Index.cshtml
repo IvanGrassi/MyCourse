@@ -12,7 +12,7 @@
 </div>
 
 <section>
-    <h2>Aggiunti di recente</h2>
+    <h2 class="head-home-h2">Aggiunti di recente</h2>
     @foreach(CourseViewModel course in Model.MostRecentCourses)
     {   //qua mettiamo il collegamento alla partial view (_CourseLine.cshtml)
         
@@ -21,7 +21,7 @@
 </section>    
 
 <section>
-    <h2>I migliori di sempre</h2>
+    <h2 class="head-home-h2">I migliori di sempre</h2>
     @foreach(CourseViewModel course in Model.BestRatingCourses)
     {
         <partial name="Courses/_CourseLine" model="@course"></partial>

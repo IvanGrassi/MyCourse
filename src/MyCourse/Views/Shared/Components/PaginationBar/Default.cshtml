@@ -7,7 +7,8 @@
     int totalPages = (int) Math.Ceiling(Model.TotalResults / (decimal) Model.ResultsPerPage);
     int currentPage = Model.CurrentPage;
 }
-<nav aria-label="Paginazione">
+</div>
+<nav aria-label="Paginazione" class="pagination-number">
     <ul class="pagination d-flex justify-content-center mt-3">
         @if(currentPage > 1)
         {

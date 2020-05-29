@@ -18,6 +18,31 @@ body > footer {
 
 /*proprietà generali*/
 
+.card-dimensions {
+  border-radius: 0px;
+  -webkit-box-shadow: 6px 6px 5px -5px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 6px 6px 5px -5px rgba(0, 0, 0, 0.75);
+  box-shadow: 6px 6px 5px -5px rgba(0, 0, 0, 0.75);
+}
+
+.card-img {
+  border-radius: 0px;
+}
+
+.cards-align {
+  display: inline-block;
+  margin: -2px;
+  padding-bottom: 2em;
+}
+
+.card-title {
+  height: 3.5rem;
+}
+
+.sub-author {
+  padding-bottom: 1em;
+}
+
 h1 {
   margin-top: 0.7em;
   margin-bottom: 0.7em;
@@ -28,6 +53,11 @@ h1 {
   margin: 0;
   padding: 0;
   font-size: 1.25em;
+}
+
+.head-home-h2 {
+  margin-bottom: 0.8em;
+  padding-left: 15px;
 }
 
 hr {
@@ -42,11 +72,24 @@ author {
 .rating {
   color: orange;
   white-space: nowrap;
+  letter-spacing: 5px;
+  font-size: 1.2em;
 }
 
 .price s {
   color: #aaa;
   font-size: 0.8em;
+}
+
+.oldPrice {
+  text-decoration: line-through;
+}
+
+.detailBtn {
+  margin: 0 auto;
+  display: block;
+  padding: 0;
+  font-size: 1.4em;
 }
 
 footer {
@@ -56,6 +99,11 @@ footer {
   padding-bottom: 2em;
   text-align: center;
   color: gray;
+}
+
+.pagination-number {
+  margin: 0 auto;
+  display: block;
 }
 
 /*tutto ciò che riguarda il dettaglio corso*/
@@ -107,6 +155,11 @@ section + section {
 
 .jumbotron .lead {
   color: white;
+}
+
+.searchBy {
+  font-size: 1.3em;
+  margin-bottom: 1em;
 }
 
 /*gestione dei campi compilati incorrettamente*/
